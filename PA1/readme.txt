@@ -10,7 +10,7 @@
 	b11032006-p1/util.cpp  		: implementation
 	b11032006-p1/Generator.h  	: header file
 	b11032006-p1/Generator.cpp  : cpp file
-    	b11032006-p1/Makefile  		: Makefile
+	b11032006-p1/Makefile  		: Makefile
 	b11032006-p1/readme.txt		: 本檔案
 	b11032006-p1/prefix.txt     : prefix file
 	b11032006-p1/suffix.txt     : suffix file
