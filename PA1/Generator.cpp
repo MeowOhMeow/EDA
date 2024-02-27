@@ -70,26 +70,27 @@ void Generator::generate()
     getline(fin, line);
     getline(fin, line);
 
-    string result = prefix;
-    for (int i = 0; i < macroCount; i++)
-    {
-        getline(fin, line);
-        vector<string> tokens = split(line, ' ');
-        result += "set object " + to_string(i+1) +" rect from ";
-        result += tokens[1] + "," + tokens[2] + " to ";
-        result += tokens[3] + "," + tokens[4] + "\n";
-        result += "set label \"" + tokens[0] + "\" at ";
-        result += to_string((stoi(tokens[1]) + stoi(tokens[3])) / 2) + ",";
-        result += to_string((stoi(tokens[2]) + stoi(tokens[4])) / 2) + "center\n";
-    }
-    fin.close();
-    result += "set xtics " + to_string(xtics) + "\n";
-    result += "set ytics " + to_string(ytics) + "\n";
-    result += "plot [0:" + to_string(xbound) + "][0:" + to_string(ybound) + "]0\n";
-    result += suffix;
-
     ofstream fout;
     fout.open("output.gp");
-    fout << result;
+
+    fout << prefix;
+    for (int i = 0; i < macroCount; i++)
+    {
+
+        getline(fin, line);
+        vector<string> tokens = split(line, ' ');
+        fout << "set object " + to_string(i + 1) + " rect from ";
+        fout << tokens[1] + "," + tokens[2] + " to ";
+        fout << tokens[3] + "," + tokens[4] + "\n";
+        fout << "set label \"" + tokens[0] + "\" at ";
+        fout << to_string((stoi(tokens[1]) + stoi(tokens[3])) / 2) + ",";
+        fout << to_string((stoi(tokens[2]) + stoi(tokens[4])) / 2) + "center\n";
+    }
+    fout << "set xtics " + to_string(xtics) + "\n";
+    fout << "set ytics " + to_string(ytics) + "\n";
+    fout << "plot [0:" + to_string(xbound) + "][0:" + to_string(ybound) + "]0\n";
+    fout << suffix;
+
+    fin.close();
     fout.close();
 }
