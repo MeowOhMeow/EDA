@@ -1,0 +1,4 @@
+reset
+set title "result"
+set xlabel "X"
+set ylabel "Y"
