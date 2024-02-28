@@ -74,12 +74,11 @@ void Generator::generate()
     fout.open("output.gp");
 
     fout << prefix;
-    for (int i = 0; i < macroCount; i++)
+    for (int i = 1; i <= macroCount; i++)
     {
-
         getline(fin, line);
         vector<string> tokens = split(line, ' ');
-        fout << "set object " + to_string(i + 1) + " rect from ";
+        fout << "set object " + to_string(i) + " rect from ";
         fout << tokens[1] + "," + tokens[2] + " to ";
         fout << tokens[3] + "," + tokens[4] + "\n";
         fout << "set label \"" + tokens[0] + "\" at ";
