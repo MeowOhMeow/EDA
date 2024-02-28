@@ -5,6 +5,13 @@ SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
 EXECUTABLE = solution
 
+ifeq ($(OS),Windows_NT)
+	RM = del /Q
+	EXECUTABLE = solution.exe
+else
+	RM = rm -f
+endif
+
 all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJS)
@@ -14,4 +21,4 @@ $(EXECUTABLE): $(OBJS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(EXECUTABLE)
+	$(RM) -f $(OBJS) $(EXECUTABLE)
