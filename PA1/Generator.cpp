@@ -35,10 +35,10 @@ void Generator::init()
     xtics = xbound / 5;
     ytics = ybound / 5;
 
-    cout << "xbound: " << xbound << endl;
-    cout << "ybound: " << ybound << endl;
-    cout << "xtics: " << xtics << endl;
-    cout << "ytics: " << ytics << endl;
+    clog << "xbound: " << xbound << endl;
+    clog << "ybound: " << ybound << endl;
+    clog << "xtics: " << xtics << endl;
+    clog << "ytics: " << ytics << endl;
 }
 
 void Generator::loadPrefixNSuffix()
@@ -60,6 +60,8 @@ void Generator::loadPrefixNSuffix()
         suffix += line + "\n";
     }
     fin.close();
+
+    clog << "prefix and suffix loaded" << endl;
 }
 
 void Generator::generate()
