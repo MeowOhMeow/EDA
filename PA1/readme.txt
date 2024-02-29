@@ -17,13 +17,13 @@
 7. 編譯方式說明：        	
    主程式：
 	   在 b11032006-p1/ 這個資料夾下指令 : make
-	   即可在 b11032006-p1 產生 ./solution 的執行檔
+	   即可在 b11032006-p1 產生 ./genPlot 的執行檔
 	
 8. 執行、使用方式說明：
    主程式：
-   	   compile 完成後，在 b11032006-p1/ 目錄下會產生一個 solution 的執行檔
+   	   compile 完成後，在 b11032006-p1/ 目錄下會產生一個 genPlot 的執行檔
    	   執行檔的命令格式為 :
-   	   ./solution [input file name] [output file name]
+   	   ./genPlot [input file name] [output file name]
 
-	   ex: ./solution input.txt output.gp
+	   ex: ./genPlot input.txt output.gp
 	   

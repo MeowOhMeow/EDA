@@ -3,11 +3,11 @@ CXXFLAGS = -std=c++11 -Wall -g
 
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
-EXECUTABLE = solution
+EXECUTABLE = genPlot
 
 ifeq ($(OS),Windows_NT)
 	RM = del /Q
-	EXECUTABLE = solution.exe
+	EXECUTABLE = genPlot.exe
 else
 	RM = rm -f
 endif
