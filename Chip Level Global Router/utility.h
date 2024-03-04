@@ -1,15 +1,11 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include "debug.h"
-#include "solution.h"
-
 #include <string>
-#include <fstream>
-#include <iostream>
+#include <vector>
 
-void init(int argc, char *argv[]);
-void sovle();
-void save_path();
+using namespace std;
+
+vector<string> split(string str, char delim);
 
 #endif // UTILITY_H
