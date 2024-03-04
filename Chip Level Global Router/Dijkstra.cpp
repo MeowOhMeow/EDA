@@ -20,7 +20,7 @@ void Dijkstra::dijkstra(int pos)
         int u = Q.top().second;
         Q.pop();
 
-        for (int i = 0; i < adj[u].size(); i++)
+        for (size_t i = 0; i < adj[u].size(); i++)
         {
             int v = adj[u][i].first;
             float w = adj[u][i].second;

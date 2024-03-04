@@ -86,7 +86,7 @@ void Solution::init()
 
 void Solution::update_adj(int pos)
 {
-    for (int i = 0; i < adj[pos].size(); i++)
+    for (size_t i = 0; i < adj[pos].size(); i++)
     {
         if (adj[pos][i].first == parent[pos])
         {
@@ -94,7 +94,7 @@ void Solution::update_adj(int pos)
             break;
         }
     }
-    for (int i = 0; i < adj[parent[pos]].size(); i++)
+    for (size_t i = 0; i < adj[parent[pos]].size(); i++)
     {
         if (adj[parent[pos]][i].first == pos)
         {
