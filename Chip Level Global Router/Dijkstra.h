@@ -5,12 +5,13 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <math.h>
+#include <cmath>
 #include <fstream>
 #include <algorithm>
 #include <limits>
 
 #include "debug.h"
+#include "GraphNode.h"
 
 using namespace std;
 
@@ -23,7 +24,7 @@ protected:
     int vertices;
 
     // (adjacent, weight)
-    vector<vector<pair<int, float>>> adj;
+    vector<vector<GraphNode>> adj;
     vector<int> parent;
     vector<float> d;
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> Q;

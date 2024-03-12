@@ -68,8 +68,10 @@ void Solution::init()
         for (int y = 0; y < rows - 1; y++)
         {
             int pos = x + y * cols;
-            adj[pos].push_back(make_pair(pos + cols, 1));
-            adj[pos + cols].push_back(make_pair(pos, 1));
+            // adj[pos].push_back(make_pair(pos + cols, 1));
+            // adj[pos + cols].push_back(make_pair(pos, 1));
+            adj[pos].push_back(GraphNode(pos + cols, 1));
+            adj[pos + cols].push_back(GraphNode(pos, 1));
         }
     }
     // vertical
@@ -78,8 +80,10 @@ void Solution::init()
         for (int y = 0; y < rows; y++)
         {
             int pos = x + y * cols;
-            adj[pos].push_back(make_pair(pos + 1, 1));
-            adj[pos + 1].push_back(make_pair(pos, 1));
+            // adj[pos].push_back(make_pair(pos + 1, 1));
+            // adj[pos + 1].push_back(make_pair(pos, 1));
+            adj[pos].push_back(GraphNode(pos + 1, 1));
+            adj[pos + 1].push_back(GraphNode(pos, 1));
         }
     }
 }
@@ -88,17 +92,17 @@ void Solution::update_adj(int pos)
 {
     for (size_t i = 0; i < adj[pos].size(); i++)
     {
-        if (adj[pos][i].first == parent[pos])
+        if (adj[pos][i].id == parent[pos])
         {
-            adj[pos][i].second *= alpha;
+            adj[pos][i].weight *= alpha;
             break;
         }
     }
     for (size_t i = 0; i < adj[parent[pos]].size(); i++)
     {
-        if (adj[parent[pos]][i].first == pos)
+        if (adj[parent[pos]][i].id == pos)
         {
-            adj[parent[pos]][i].second *= alpha;
+            adj[parent[pos]][i].weight *= alpha;
             break;
         }
     }
