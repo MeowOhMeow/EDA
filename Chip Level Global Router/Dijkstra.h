@@ -23,7 +23,7 @@ class Dijkstra
 protected:
     int vertices;
 
-    // (adjacent, weight)
+    // (adjacent, cost)
     vector<vector<GraphNode>> adj;
     vector<int> parent;
     vector<float> d;

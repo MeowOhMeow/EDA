@@ -31,6 +31,7 @@ private:
     void update_adj(int pos);
     void load();
     void init();
+    void update_cost(vector<GraphNode> &nodes, int id);
 
 public:
     Solution(string input_file, string output_file);

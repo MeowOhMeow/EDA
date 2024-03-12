@@ -23,7 +23,7 @@ void Dijkstra::dijkstra(int pos)
         for (size_t i = 0; i < adj[u].size(); i++)
         {
             int v = adj[u][i].id;
-            float w = adj[u][i].weight;
+            float w = adj[u][i].cost;
 
             if (d[v] > d[u] + w)
             {
