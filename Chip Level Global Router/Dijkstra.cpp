@@ -4,16 +4,16 @@ void Dijkstra::init_single_source(int s)
 {
     for (int i = 0; i < vertices; i++)
     {
-        d[i] = INF;
+        cost[i] = INF;
         parent[i] = NIL;
     }
-    d[s] = 0;
+    cost[s] = 0;
 }
 
 void Dijkstra::dijkstra(int pos)
 {
     init_single_source(pos);
-    Q.push(make_pair(d[pos], pos));
+    Q.push(make_pair(cost[pos], pos));
 
     while (!Q.empty())
     {
@@ -24,12 +24,13 @@ void Dijkstra::dijkstra(int pos)
         {
             int v = adj[u][i].id;
             float w = adj[u][i].cost;
+            // if there is a turn, the cost should be increased
 
-            if (d[v] > d[u] + w)
+            if (cost[v] > cost[u] + w)
             {
-                d[v] = d[u] + w;
+                cost[v] = cost[u] + w;
                 parent[v] = u;
-                Q.push(make_pair(d[v], v));
+                Q.push(make_pair(cost[v], v));
             }
         }
     }

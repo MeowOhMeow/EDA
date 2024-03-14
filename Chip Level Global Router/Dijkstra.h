@@ -11,7 +11,7 @@
 #include <limits>
 
 #include "debug.h"
-#include "GraphNode.h"
+#include "GraphEdge.h"
 
 using namespace std;
 
@@ -24,9 +24,9 @@ protected:
     int vertices;
 
     // (adjacent, cost)
-    vector<vector<GraphNode>> adj;
+    vector<vector<GraphEdge>> adj;
     vector<int> parent;
-    vector<float> d;
+    vector<float> cost;
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> Q;
 
     void init_single_source(int s);

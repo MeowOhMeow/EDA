@@ -56,7 +56,7 @@ void Solution::init()
     vertices = rows * cols;
     adj.resize(vertices);
     parent.resize(vertices);
-    d.resize(vertices);
+    cost.resize(vertices);
     paths.resize(num_nets);
 
     alpha = pow(100, 1.0 / capacity);
@@ -68,8 +68,8 @@ void Solution::init()
         for (int y = 0; y < rows - 1; y++)
         {
             int pos = x + y * cols;
-            adj[pos].push_back(GraphNode(pos + cols, 1));
-            adj[pos + cols].push_back(GraphNode(pos, 1));
+            adj[pos].push_back(GraphEdge(pos + cols, 1));
+            adj[pos + cols].push_back(GraphEdge(pos, 1));
         }
     }
     // vertical
@@ -78,21 +78,22 @@ void Solution::init()
         for (int y = 0; y < rows; y++)
         {
             int pos = x + y * cols;
-            adj[pos].push_back(GraphNode(pos + 1, 1));
-            adj[pos + 1].push_back(GraphNode(pos, 1));
+            adj[pos].push_back(GraphEdge(pos + 1, 1));
+            adj[pos + 1].push_back(GraphEdge(pos, 1));
         }
     }
 }
 
-void Solution::update_cost(vector<GraphNode> &nodes, int id) 
+// this cost is only for line capacity
+void Solution::update_cost(vector<GraphEdge> &nodes, int id) 
 {
     for (size_t i = 0; i < nodes.size(); i++)
     {
         if (nodes[i].id == id)
         {
-            // TODO: update cost using new cost fuction
             nodes[i].cost *= alpha;
             break;
+            // TODO: update cost using new cost fuction
         }
     }
 }
