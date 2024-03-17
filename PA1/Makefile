@@ -16,10 +16,9 @@ all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
-	$(RM) $(OBJS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	$(RM) $(EXECUTABLE)
+	$(RM) $(EXECUTABLE) $(OBJS)
