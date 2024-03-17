@@ -2,9 +2,10 @@
 
 using namespace std;
 
-Generator::Generator(string filename)
+Generator::Generator(string infile, string outfile)
 {
-    this->filename = filename;
+    this->infile = infile;
+    this->outfile = outfile;
     // initialize parameters
     init();
 
@@ -15,7 +16,7 @@ Generator::Generator(string filename)
 void Generator::init()
 {
     ifstream fin;
-    fin.open(filename);
+    fin.open(infile);
     string line;
 
     // Read xtics and ytics
@@ -67,13 +68,13 @@ void Generator::loadPrefixNSuffix()
 void Generator::generate()
 {
     ifstream fin;
-    fin.open(filename);
+    fin.open(infile);
     string line;
     getline(fin, line);
     getline(fin, line);
 
     ofstream fout;
-    fout.open("output.gp");
+    fout.open(outfile);
 
     fout << prefix;
     for (int i = 1; i <= macroCount; i++)

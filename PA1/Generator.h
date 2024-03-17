@@ -11,7 +11,8 @@
 class Generator
 {
 private:
-    string prefix, suffix, filename;
+    string prefix, suffix;
+    string infile, outfile;
     int xbound, ybound;
     int xtics, ytics;
     int macroCount;
@@ -20,7 +21,7 @@ private:
     void loadPrefixNSuffix();
 
 public:
-    Generator(string filename);
+    Generator(string input, string output);
     void generate();
 };
 
