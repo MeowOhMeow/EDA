@@ -2,6 +2,7 @@
 #define UTILITY_H
 
 #include <string>
+#include <sstream>
 #include <fstream>
 #include <iostream>
 #include <vector>

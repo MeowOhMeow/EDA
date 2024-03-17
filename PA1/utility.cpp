@@ -5,19 +5,11 @@ using namespace std;
 vector<string> split(string str, char delim)
 {
     vector<string> res;
-    string tmp;
-    for (auto ch : str)
+    stringstream ss(str);
+    string token;
+    while (getline(ss, token, delim))
     {
-        if (ch == delim && !tmp.empty())
-        {
-            res.push_back(tmp);
-            tmp.clear();
-        }
-        else
-        {
-            tmp.push_back(ch);
-        }
+        res.push_back(token);
     }
-    res.push_back(tmp);
     return res;
 }
