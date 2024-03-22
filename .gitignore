@@ -4,5 +4,3 @@
 **/*.png
 **/*.gp
 **/test*
-Chip Level Global Router/*
-**/*.cpp
