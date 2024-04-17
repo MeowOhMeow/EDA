@@ -33,11 +33,11 @@ void print_vertex_and_edge(Graph &g)
 
 }
 template <class Graph>
-void print_out_edge(Graph &g)
+void print_out_edge(Graph &g, int index = 2)
 {
     typename graph_traits<Graph>::vertex_iterator vi, vi_end;
 
-    typename graph_traits<Graph>::vertex_descriptor v2 = vertex(2, g);
+    typename graph_traits<Graph>::vertex_descriptor v2 = vertex(index, g);
 
     typename property_map<Graph, vertex_index_t>::type v_index = get(vertex_index, g);
 
@@ -56,11 +56,11 @@ void print_out_edge(Graph &g)
 }
 
 template <class Graph>
-void print_in_edge(Graph &g)
+void print_in_edge(Graph &g, int index = 2)
 {
     typename graph_traits<Graph>::vertex_iterator vi, vi_end;
 
-    typename graph_traits<Graph>::vertex_descriptor v2 = vertex(2, g);
+    typename graph_traits<Graph>::vertex_descriptor v2 = vertex(index, g);
 
     typename property_map<Graph, vertex_index_t>::type v_index = get(vertex_index, g);
 
@@ -78,8 +78,8 @@ void print_in_edge(Graph &g)
 int main()
 {
     const int V = 3;
-    typedef adjacency_list<vecS, vecS, undirectedS> GraphDirected;
-    typedef adjacency_list<vecS, vecS, directedS> GraphUndirected;
+    typedef adjacency_list<vecS, vecS, directedS> GraphDirected;
+    typedef adjacency_list<vecS, vecS, undirectedS> GraphUndirected;
     typedef adjacency_list<vecS, vecS, bidirectionalS> GraphBidirected;
     // bidirectionalS跟directedS的差別為:
     // bidirectionalS允許有效地訪問每個頂點的入邊（in - edges）和出邊（out - edges）。 
@@ -94,23 +94,27 @@ int main()
     add_edge(0, 2, gd);
     add_edge(1, 2, gd);
     add_edge(2, 1, gd);
-    print_vertex_and_edge(gd);
-    print_out_edge(gd);
-    print_in_edge(gd); //建議用bidirectional，比較有效率
+    // print_vertex_and_edge(gd);
+    // print_out_edge(gd);
+    // print_in_edge(gd); //建議用bidirectional，比較有效率
 
     add_edge(0, 1, gud);
     add_edge(0, 2, gud);
     add_edge(1, 2, gud);
     add_edge(2, 1, gud);
     print_vertex_and_edge(gud);
-    print_out_edge(gud);
-
+    print_out_edge(gud, 0);
+    print_in_edge(gud, 0);
+    print_out_edge(gud, 1);
+    print_in_edge(gud, 1);
+    print_out_edge(gud, 2);
+    print_in_edge(gud, 2);
 
     add_edge(0, 1, gbid);
     add_edge(0, 2, gbid);
     add_edge(1, 2, gbid);
     add_edge(2, 1, gbid);
-    print_vertex_and_edge(gbid);
-    print_out_edge(gbid);
-    print_in_edge(gbid);
+    // print_vertex_and_edge(gbid);
+    // print_out_edge(gbid);
+    // print_in_edge(gbid);
 }

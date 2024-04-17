@@ -16,7 +16,6 @@ int main()
     // 定義圖結構，包括自定義和內置的屬性
     typedef property<vertex_name_t, std::string> VertexPropertyName;                     // 頂點名字屬性，內置屬性
     typedef property<vertex_my_property_t, int, VertexPropertyName> VertexProperty;      // 自定義頂點屬性，附加在名字屬性之上
-
     typedef property<edge_index_t, int> EdgeProperty;                                    // 邊的索引屬性，內置屬性
 
     typedef adjacency_list<vecS, vecS, undirectedS, VertexProperty, EdgeProperty> Graph; // 圖類型定義
