@@ -4,8 +4,11 @@
 #include <iostream>
 #include <stack>
 #include <unordered_map>
+#include <fstream>
+#include <queue>
 #include <vector>
 #include <string>
+#include <random>
 
 #include "BinaryTree.hpp"
 #include "CombinationsOfMacros.hpp"
@@ -26,42 +29,41 @@ private:
 
     using NodePtr = typename BinaryTree<CombinationsOfMacros>::Node *;
 
-    /* 12v3v4v5...vN, v is verticalCombine -> 1*2)*3)*4)*5)*...)*N, all the numbers is a node
-     * use recursive to build the tree
-     */
+    // use queue to build a balanced tree
     NodePtr build(vector<CombinationsOfMacros> &macros)
     {
-        stack<NodePtr> stack;
-        NodePtr node = new typename BinaryTree<CombinationsOfMacros>::Node(macros[0]);
-        stack.push(node);
-        for (size_t i = 1; i < macros.size(); i++)
+        queue<NodePtr> q;
+        for (size_t i = 0; i < macros.size(); i++)
         {
-            NodePtr newNode = new typename BinaryTree<CombinationsOfMacros>::Node(macros[i]);
-            NodePtr left = stack.top();
-            stack.pop();
-
-            NodePtr mulNode = new typename BinaryTree<CombinationsOfMacros>::Node(newNode->data * left->data);
-            mulNode->left = left;
-            mulNode->right = newNode;
-
-            stack.push(mulNode);
+            q.push(new typename BinaryTree<CombinationsOfMacros>::Node(macros[i]));
         }
 
-        while (stack.size() > 1)
+        while (q.size() > 1)
         {
-            NodePtr right = stack.top();
-            stack.pop();
-            NodePtr left = stack.top();
-            stack.pop();
+            NodePtr left = q.front();
+            q.pop();
+            NodePtr right = q.front();
+            q.pop();
 
-            NodePtr mulNode = new typename BinaryTree<CombinationsOfMacros>::Node(left->data * right->data);
-            mulNode->left = left;
-            mulNode->right = right;
+            if (rand() % 2)
+            {
+                NodePtr mulNode = new typename BinaryTree<CombinationsOfMacros>::Node(left->data * right->data);
+                mulNode->left = left;
+                mulNode->right = right;
 
-            stack.push(mulNode);
+                q.push(mulNode);
+            }
+            else
+            {
+                NodePtr addNode = new typename BinaryTree<CombinationsOfMacros>::Node(left->data + right->data);
+                addNode->left = left;
+                addNode->right = right;
+
+                q.push(addNode);
+            }
         }
 
-        return stack.top();
+        return q.front();
     }
 
     vector<string> getExpressions(NodePtr node, vector<string> &expression)

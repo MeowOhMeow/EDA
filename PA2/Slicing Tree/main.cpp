@@ -24,7 +24,7 @@ vector<string> split(string str, char delim)
     return res;
 }
 
-SlicingTree createTree(string filename, unordered_map<string, pair<int, int>> &macrosMap)
+vector<CombinationsOfMacros> createTree(string filename, unordered_map<string, pair<int, int>> &macrosMap)
 {
     vector<CombinationsOfMacros> macros;
     ifstream file(filename);
@@ -47,9 +47,7 @@ SlicingTree createTree(string filename, unordered_map<string, pair<int, int>> &m
     }
     file.close();
 
-    SlicingTree tree(macros);
-
-    return tree;
+    return macros;
 }
 
 int main(int argc, char *argv[])
@@ -62,7 +60,8 @@ int main(int argc, char *argv[])
     }
     // create a tree from the input file
     unordered_map<string, pair<int, int>> macrosMap;
-    SlicingTree tree = createTree(argv[1], macrosMap);
+    vector<CombinationsOfMacros> macros = createTree(argv[1], macrosMap);
+    SlicingTree tree(macros);
 
     // create a procedure for sa
     FloorPlanningProcedure procedure;
@@ -70,7 +69,7 @@ int main(int argc, char *argv[])
     SimulatedAnnealing sa(10, 0.9, 0.1, 7);
     // run the simulated annealing algorithm
     vector<string> bestExpressions = sa.run(tree, procedure, macrosMap);
-    
+
     // create a tree from the best expressions
     SlicingTree bestTree(bestExpressions, macrosMap);
     bestTree.saveToFile(argv[2]);
