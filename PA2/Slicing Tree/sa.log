@@ -1,0 +1,17 @@
+temperature: 10
+coolingRate: 0.9
+absoluteTemperature: 0.1
+iterations: 7
+Expression size: 19
+      Time     Steps                Cost
+       599       141                3175
+       599       282                3125
+       599       423                3125
+       599       564                2900
+       599       705                2900
+       599       846                2900
+       599       987                2900
+       599      1128                2900
+       599      1269                2900
+       599      1410                2900
+No improvement

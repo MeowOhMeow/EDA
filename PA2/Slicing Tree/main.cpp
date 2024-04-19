@@ -58,30 +58,11 @@ int main(int argc, char *argv[])
     if (argc != 3)
     {
         cout << "Usage: " << argv[0] << " <inputfile> <outputfile>" << endl;
-        // return 1;
+        return 1;
     }
     // create a tree from the input file
     unordered_map<string, pair<int, int>> macrosMap;
-    SlicingTree tree = createTree("..\\testcases\\floorplan_6.txt", macrosMap);
-
-    // print the tree
-    tree.printStructure();
-    vector<string> expression = tree.getExpressions();
-    cout << "Expression: ";
-    for (string s : expression)
-    {
-        cout << s;
-    }
-    cout << endl;
-
-    SlicingTree tree2(expression, macrosMap);
-    expression = tree2.getExpressions();
-    cout << "Expression: ";
-    for (string s : expression)
-    {
-        cout << s;
-    }
-    cout << endl;
+    SlicingTree tree = createTree(argv[1], macrosMap);
 
     // create a procedure for sa
     FloorPlanningProcedure procedure;
@@ -89,18 +70,11 @@ int main(int argc, char *argv[])
     SimulatedAnnealing sa(10, 0.9, 0.1, 7);
     // run the simulated annealing algorithm
     vector<string> bestExpressions = sa.run(tree, procedure, macrosMap);
-    cout << "Best expressions: ";
-    for (string s : bestExpressions)
-    {
-        cout << s;
-    }
-    cout << endl;
+    
     // create a tree from the best expressions
     SlicingTree bestTree(bestExpressions, macrosMap);
-    cout << "Best tree: " << endl;
-    // print the best tree
-    bestTree.printStructure();
-    // print the best tree's area
-    cout << "Area: " << procedure.evaluateState(bestExpressions, macrosMap) << endl;
+    bestTree.saveToFile(argv[2]);
+    cout << "Output saved to " << argv[2] << endl;
+    cout << "See sa.log for more details" << endl;
     return 0;
 }

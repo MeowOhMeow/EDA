@@ -5,6 +5,7 @@
 #include <random>
 #include <unordered_map>
 #include <chrono>
+#include <iomanip>
 
 #include "SlicingTree.hpp"
 #include "CombinationsOfMacros.hpp"
@@ -25,7 +26,6 @@ private:
 
     std::chrono::high_resolution_clock::time_point end;
 
-    int bestIndex, index;
     int n, k;
     int movesCount = 0;
     int uphillCount = 0;
@@ -35,7 +35,7 @@ private:
     vector<string> move1(vector<string> &expressions)
     {
         int expressionsSize = expressions.size();
-        int nodeIndex = FloorPlanningProcedure::getRandomNumber(0, expressionsSize - 2);
+        int nodeIndex = getRandomNumber(0, expressionsSize - 2);
 
         // Find the index of the first non-operator expression after nodeIndex
         while (expressions[nodeIndex] == HORIZONTAL || expressions[nodeIndex] == VERTICAL)
@@ -59,8 +59,8 @@ private:
     vector<string> move2(vector<string> &expressions)
     {
         int expressionsSize = expressions.size();
-        int nodeIndex1 = FloorPlanningProcedure::getRandomNumber(0, expressionsSize - 1);
-        int nodeIndex2 = FloorPlanningProcedure::getRandomNumber(0, expressionsSize - 1);
+        int nodeIndex1 = getRandomNumber(0, expressionsSize - 1);
+        int nodeIndex2 = getRandomNumber(0, expressionsSize - 1);
         if (nodeIndex1 > nodeIndex2)
         {
             swap(nodeIndex1, nodeIndex2);
@@ -98,7 +98,7 @@ private:
         int operatorCount = 0;
 
         // Count the number of operators before nodeIndex
-        int nodeIndex = FloorPlanningProcedure::getRandomNumber(1, expressionsSize - 3);
+        int nodeIndex = getRandomNumber(1, expressionsSize - 3);
         for (int i = 1; i <= nodeIndex + 1; ++i)
         {
             if (expressions[i] == HORIZONTAL || expressions[i] == VERTICAL)
@@ -110,25 +110,30 @@ private:
         // Check conditions for adjacent operand and operator
         while (true)
         {
-            if ((2 * operatorCount <= nodeIndex) 
-            && (expressions[nodeIndex] == HORIZONTAL || expressions[nodeIndex] == VERTICAL) 
-            && (expressions[nodeIndex + 1] != HORIZONTAL && expressions[nodeIndex + 1] != VERTICAL))
+            if ((expressions[nodeIndex] == HORIZONTAL || expressions[nodeIndex] == VERTICAL) && (expressions[nodeIndex + 1] != HORIZONTAL && expressions[nodeIndex + 1] != VERTICAL))
             {
-                swap(expressions[nodeIndex], expressions[nodeIndex + 1]);
                 break;
+            }
+            else if ((expressions[nodeIndex] != HORIZONTAL && expressions[nodeIndex] != VERTICAL) && (expressions[nodeIndex + 1] == HORIZONTAL || expressions[nodeIndex + 1] == VERTICAL))
+            {
+                if (2 * operatorCount < nodeIndex)
+
+                    break;
             }
             // Move to the next position
             nodeIndex = (nodeIndex + 1) % (expressionsSize - 3);
             if (nodeIndex == 0)
             {
                 nodeIndex = 1;
-                operatorCount = 0;
+                operatorCount = expressions[2] == HORIZONTAL || expressions[2] == VERTICAL ? 1 : 0;
             }
-            else if (expressions[nodeIndex] == HORIZONTAL || expressions[nodeIndex] == VERTICAL)
+            else if (expressions[nodeIndex + 1] == HORIZONTAL || expressions[nodeIndex + 1] == VERTICAL)
             {
                 operatorCount++;
             }
         }
+
+        swap(expressions[nodeIndex], expressions[nodeIndex + 1]);
 
         return expressions;
     }
@@ -136,9 +141,15 @@ private:
 public:
     bool improving = true;
     bool run = true;
+    int warmUpCount = 0;
 
-    FloorPlanningProcedure() {}
-    ~FloorPlanningProcedure() {}
+    double temperature = 1;
+    double coolingRate = 0.95;
+
+    FloorPlanningProcedure()
+    {
+        end = chrono::high_resolution_clock::now() + chrono::minutes(10);
+    }
 
     inline void initialize()
     {
@@ -151,7 +162,7 @@ public:
     inline vector<string> makeRandomModification(vector<string> &expressions)
     {
         movesCount++;
-        if (movesCount > n * 2)
+        if (movesCount > 2 * n * k)
         {
             run = false;
         }
@@ -175,22 +186,18 @@ public:
         }
     }
 
-    inline float evaluateState(vector<string> &expressions, unordered_map<string, pair<int, int>> &macrosMap)
+    inline double evaluateState(vector<string> &expressions, unordered_map<string, pair<int, int>> &macrosMap)
     {
         SlicingTree tree(expressions, macrosMap);
         CombinationsOfMacros rootData = tree.getRootData();
         vector<pair<int, int>> dimensions = rootData.getDimensions();
-        index = 0;
-        int minArea = max(dimensions[0].first, dimensions[0].second);
-        minArea *= minArea;
-        for (size_t i = 1; i < dimensions.size(); i++)
+        int minArea = INT_MAX;
+        for (size_t i = 0; i < dimensions.size(); i++)
         {
             int area = max(dimensions[i].first, dimensions[i].second);
-            area *= area;
             if (area < minArea)
             {
                 minArea = area;
-                index = i;
             }
         }
         return minArea;
@@ -198,6 +205,14 @@ public:
 
     inline bool isImproving()
     {
+        warmUpCount++;
+        if (warmUpCount < n)
+        {
+            int completion = (warmUpCount * 100) / (n);
+            cout << "Warmming up..." << setw(4) << completion << "% [" << string(completion / 2, '=') << string(50 - completion / 2, ' ') << "]\r";
+            return true;
+        }
+        temperature *= coolingRate;
         // check if the current state is improving
         if (rejectCount / movesCount > 0.95)
         {
@@ -209,22 +224,31 @@ public:
     inline bool hasTimeExpired()
     {
         // check if there is still time left
-        return chrono::high_resolution_clock::now() < end;
+        return chrono::high_resolution_clock::now() >= end;
     }
 
     inline void setN(int n)
     {
-        n = n;
+        this->n = n;
     }
 
     inline void setK(int k)
     {
-        k = k;
+        this->k = k;
     }
 
     inline void accept()
     {
-        bestIndex = index;
+    }
+
+    inline void setTemperature(double temperature)
+    {
+        this->temperature = temperature;
+    }
+
+    inline void setCoolingRate(double coolingRate)
+    {
+        this->coolingRate = coolingRate;
     }
 
     inline void uphill()
@@ -256,6 +280,17 @@ public:
         static mt19937 gen(rd());
         uniform_real_distribution<float> dis(min, max);
         return dis(gen);
+    }
+
+    // in seconds
+    inline int getRemainingTime()
+    {
+        return chrono::duration_cast<chrono::seconds>(end - chrono::high_resolution_clock::now()).count();
+    }
+
+    inline double getTemperature()
+    {
+        return temperature;
     }
 };
 

@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <fstream>
+#include <iomanip>
 
 #include "FloorPlanningProcedure.hpp"
 #include "SlicingTree.hpp"
@@ -12,30 +14,48 @@ using namespace std;
 class SimulatedAnnealing
 {
 private:
-    float temperature, coolingRate, absoluteTemperature;
+    double temperature, coolingRate, absoluteTemperature;
     int iterations;
+    ofstream logFile;
 
 public:
     SimulatedAnnealing(
-        float temperature = 1,
-        float coolingRate = 0.95,
-        float absoluteTemperature = 0.01,
+        double temperature = 1,
+        double coolingRate = 0.95,
+        double absoluteTemperature = 0.01,
         int iterations = 7)
     {
         this->temperature = temperature;
         this->coolingRate = coolingRate;
         this->absoluteTemperature = absoluteTemperature;
         this->iterations = iterations;
+        logFile.open("sa.log");
+        logFile << "temperature: " << temperature << endl;
+        logFile << "coolingRate: " << coolingRate << endl;
+        logFile << "absoluteTemperature: " << absoluteTemperature << endl;
+        logFile << "iterations: " << iterations << endl;
+    }
+
+    ~SimulatedAnnealing()
+    {
+        logFile.close();
     }
 
     vector<string> run(SlicingTree &tree, FloorPlanningProcedure &procedure, unordered_map<string, pair<int, int>> &macrosMap)
     {
         procedure.setN(sizeOfBlocks);
         procedure.setK(iterations);
+        procedure.setTemperature(temperature);
+        procedure.setCoolingRate(coolingRate);
 
         vector<string> bestExpressions = tree.getExpressions();
         vector<string> currentExpressions = tree.getExpressions();
         float bestCost = procedure.evaluateState(bestExpressions, macrosMap);
+
+        logFile << "Expression size: " << bestExpressions.size() << endl;
+        logFile << setw(10) << "Time" << setw(10) << "Steps" << setw(20) << "Cost" << endl;
+
+        int steps = 0;
 
         do
         {
@@ -46,11 +66,6 @@ public:
                 vector<string> newExpressions = procedure.makeRandomModification(currentExpressions);
 
                 float newCost = procedure.evaluateState(newExpressions, macrosMap);
-                for (auto &exp : newExpressions)
-                {
-                    cout << exp << " ";
-                }
-                cout << endl;
 
                 if (newCost <= bestCost)
                 {
@@ -61,7 +76,7 @@ public:
                 }
                 else
                 {
-                    float acceptanceProbability = exp((bestCost - newCost) / temperature);
+                    float acceptanceProbability = exp((bestCost - newCost) / procedure.getTemperature());
                     if (acceptanceProbability > procedure.getRandomNumber(0.0f, 1.0f))
                     {
                         currentExpressions = newExpressions;
@@ -72,13 +87,26 @@ public:
                         procedure.reject();
                     }
                 }
+
+                steps++;
             }
 
-            temperature *= coolingRate;
-            cout << "isImproving: " << procedure.isImproving() << endl;
-            cout << "hasTimeExpired: " << procedure.hasTimeExpired() << endl;
-            cout << "temperature > absoluteTemperature: " << (temperature > absoluteTemperature) << endl;
-        } while (procedure.isImproving() && !procedure.hasTimeExpired() && temperature > absoluteTemperature);
+            logFile << setw(10) << procedure.getRemainingTime() << setw(10) << steps << setw(20) << bestCost << endl;
+        } while (procedure.isImproving() && !procedure.hasTimeExpired() && procedure.getTemperature() > absoluteTemperature);
+
+        if (procedure.hasTimeExpired())
+        {
+            logFile << "Time expired" << endl;
+        }
+        else if (!procedure.isImproving())
+        {
+            logFile << "No improvement" << endl;
+        }
+        else
+        {
+            logFile << "Temperature too low, temperature: " << procedure.getTemperature() << endl;
+        }
+        cout << endl;
 
         return bestExpressions;
     }

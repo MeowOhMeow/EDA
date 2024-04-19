@@ -5,15 +5,13 @@
 #include <vector>
 #include <string>
 
-#include "SlicingTree.hpp"
-
 using namespace std;
 
-enum Direction
-{
-    ORIGINAL,
-    ROTATED
-};
+// enum Direction
+// {
+//     ORIGINAL,
+//     ROTATED
+// };
 
 class CombinationsOfMacros
 {
@@ -24,8 +22,11 @@ private:
     string operatorChar = " ";
     vector<pair<int, int>> dimensions = {};
     vector<string> names = {};
-    vector<Direction> directions = {};
+    // vector<Direction> directions = {};
     vector<pair<int, int>> combinationIndex = {};
+
+    int offsetX = 0;
+    int offsetY = 0;
 
     static void eliminateBadCombinations(CombinationsOfMacros &combinations)
     {
@@ -37,32 +38,11 @@ private:
                 {
                     combinations.dimensions.erase(combinations.dimensions.begin() + j);
                     combinations.names.erase(combinations.names.begin() + j);
-                    combinations.directions.erase(combinations.directions.begin() + j);
+                    // combinations.directions.erase(combinations.directions.begin() + j);
                     combinations.combinationIndex.erase(combinations.combinationIndex.begin() + j);
                     j--;
                 }
             }
-        }
-    }
-
-    bool addMacro(string n, int w, int h)
-    {
-        if (w != h)
-        {
-            dimensions.push_back({w, h});
-            dimensions.push_back({h, w});
-            names.push_back(n);
-            names.push_back(n);
-            directions.push_back(ORIGINAL);
-            directions.push_back(ROTATED);
-            return true;
-        }
-        else
-        {
-            dimensions.push_back({w, h});
-            names.push_back(n);
-            directions.push_back(ORIGINAL);
-            return false;
         }
     }
 
@@ -73,12 +53,42 @@ public:
 
     CombinationsOfMacros(string n, int w, int h)
     {
-        addMacro(n, w, h);
+        if (w != h)
+        {
+            dimensions.push_back({w, h});
+            dimensions.push_back({h, w});
+            names.push_back(n);
+            names.push_back(n);
+            // directions.push_back(ORIGINAL);
+            // directions.push_back(ROTATED);
+        }
+        else
+        {
+            dimensions.push_back({w, h});
+            names.push_back(n);
+            // directions.push_back(ORIGINAL);
+        }
     }
 
     CombinationsOfMacros(string n, pair<int, int> d)
     {
-        addMacro(n, d.first, d.second);
+        int w = d.first;
+        int h = d.second;
+        if (w != h)
+        {
+            dimensions.push_back({w, h});
+            dimensions.push_back({h, w});
+            names.push_back(n);
+            names.push_back(n);
+            // directions.push_back(ORIGINAL);
+            // directions.push_back(ROTATED);
+        }
+        else
+        {
+            dimensions.push_back({w, h});
+            names.push_back(n);
+            // directions.push_back(ORIGINAL);
+        }
     }
 
     string getOperatorChar() const
@@ -96,15 +106,15 @@ public:
         return dimensions[index];
     }
 
-    vector<Direction> getDirections() const
-    {
-        return directions;
-    }
+    // vector<Direction> getDirections() const
+    // {
+    //     return directions;
+    // }
 
-    Direction getDirection(int index) const
-    {
-        return directions[index];
-    }
+    // Direction getDirection(int index) const
+    // {
+    //     return directions[index];
+    // }
 
     vector<string> getNames() const
     {
@@ -156,16 +166,9 @@ public:
                 string name = "(" + names[i] + HORIZONTAL + other.names[j] + ")";
                 int w = max(dimensions[i].first, other.dimensions[j].first);
                 int h = dimensions[i].second + other.dimensions[j].second;
-                bool notSquare = result.addMacro(name, w, h);
-                if (notSquare)
-                {
-                    result.combinationIndex.push_back({i, j});
-                    result.combinationIndex.push_back({j, i});
-                }
-                else
-                {
-                    result.combinationIndex.push_back({i, j});
-                }
+                result.dimensions.push_back({w, h});
+                result.names.push_back(name);
+                result.combinationIndex.push_back({i, j});
             }
         }
         // eliminate bad combinations
@@ -185,16 +188,9 @@ public:
                 string name = "(" + names[i] + VERTICAL + other.names[j] + ")";
                 int w = dimensions[i].first + other.dimensions[j].first;
                 int h = max(dimensions[i].second, other.dimensions[j].second);
-                bool notSquare = result.addMacro(name, w, h);
-                if (notSquare)
-                {
-                    result.combinationIndex.push_back({i, j});
-                    result.combinationIndex.push_back({j, i});
-                }
-                else
-                {
-                    result.combinationIndex.push_back({i, j});
-                }
+                result.dimensions.push_back({w, h});
+                result.names.push_back(name);
+                result.combinationIndex.push_back({i, j});
             }
         }
         // eliminate bad combinations
