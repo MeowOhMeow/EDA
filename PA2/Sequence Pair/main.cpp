@@ -1,65 +1,116 @@
 #include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <unordered_map>
+#include <algorithm>
 
-#include "Graph/Graph.hpp"
+#include "Macro.hpp"
 
 using namespace std;
 
+struct KeyValuePair
+{
+    int key;
+    int x;
+    int y;
+    Macro *value;
+
+    KeyValuePair(int x, int y, Macro *value) : key(x + y), x(x), y(y), value(value) {}
+};
+
+bool compare(KeyValuePair &a, KeyValuePair &b)
+{
+    return a.key < b.key;
+}
+
+vector<string> split(string str, char delim)
+{
+    vector<string> res;
+    stringstream ss(str);
+    string token;
+    while (getline(ss, token, delim))
+    {
+        res.push_back(token);
+    }
+    return res;
+}
+
+vector<Macro> getMacros(string filename)
+{
+    vector<Macro> macros;
+    ifstream file(filename);
+    string line;
+    int nums;
+    getline(file, line);
+    vector<string> tokens = split(line, ' ');
+    nums = stoi(tokens[1]);
+    getline(file, line);
+    getline(file, line);
+    for (int i = 0; i < nums; i++)
+    {
+        getline(file, line);
+        vector<string> tokens = split(line, ' ');
+        string name = tokens[0];
+        int w = stoi(tokens[1]);
+        int h = stoi(tokens[2]);
+        macros.push_back(Macro(name, w, h));
+    }
+    file.close();
+
+    return macros;
+}
+
+vector<pair<int, int>> getCoordinates(vector<int> &seq1, vector<int> &seq2)
+{
+    vector<pair<int, int>> coordinates;
+    unordered_map<int, int> seq2_map;
+    // Create a mapping of elements in seq2 to their indices
+    for (int i = 0; i < seq2.size(); i++)
+    {
+        seq2_map[seq2[i]] = i;
+    }
+
+    // Generate coordinates based on seq1 and seq2_map
+    for (int i = 0; i < seq1.size(); i++)
+    {
+        if (seq2_map.find(seq1[i]) != seq2_map.end())
+        {
+            coordinates.push_back({i, seq2_map[seq1[i]]});
+        }
+    }
+
+    return coordinates;
+}
+
 int main()
 {
-    // Create a graph with 5 nodes
-    Graph<int, int> graph(5);
-
-    Vertex v1(1);
-    Vertex v2(2);
-    Vertex v3(3);
-    Vertex v4(4);
-    Vertex v5(5);
-
-    // Add some edges
-    graph.addBidirectedEdge(0, 1, 1, 2);
-    graph.addBidirectedEdge(0, 2, 2, 3);
-    graph.addBidirectedEdge(1, 2, 3, 4);
-    graph.addBidirectedEdge(1, 3, 4, 5);
-    graph.addBidirectedEdge(2, 4, 5, 6);
-    graph.addBidirectedEdge(3, 4, 6, 7);
-
-    // Print the adjacency list
-    vector<map<int, float>> adjacencyList = graph.getAdjacencyList();
-    for (size_t i = 0; i < adjacencyList.size(); ++i)
+    vector<Macro> macros = getMacros("../testcases/floorplan_6.txt");
+    cout << "Macros:" << endl;
+    for (const auto &macro : macros)
     {
-        cout << i << ": ";
-        for (auto it = adjacencyList[i].begin(); it != adjacencyList[i].end(); ++it)
-        {
-            cout << it->first << "(" << it->second << ") ";
-        }
-        cout << endl;
-    }
-
-    // Get out edges of node 1
-    vector<pair<int, float>> outEdges = graph.getOutEdges(v1);
-    cout << "Out edges of node 1: ";
-    for (const auto &edge : outEdges)
-    {
-        cout << edge.first << "(" << edge.second << ") ";
+        macro.print();
     }
     cout << endl;
 
-    // Get in edges of node 4
-    vector<pair<int, float>> inEdges = graph.getInEdges(v4);
-    cout << "In edges of node 4: ";
-    for (const auto &edge : inEdges)
+    vector<int> seq1 = {0, 1, 3, 4, 2, 5};
+    vector<int> seq2 = {2, 1, 5, 0, 3, 4};
+    vector<pair<int, int>> coordinates = getCoordinates(seq1, seq2);
+    vector<KeyValuePair> pairs;
+    for (size_t i = 0; i < coordinates.size(); i++)
     {
-        cout << edge.first << "(" << edge.second << ") ";
+        cout << "x: " << coordinates[i].first << " y: " << coordinates[i].second << endl;
+        pairs.push_back(KeyValuePair(coordinates[i].first, coordinates[i].second, &macros[seq1[i]]));
     }
-    cout << endl;
 
-    // Set vertex property of node 1
-    graph.setVertexProperty(v1, VertexProperty<int>(10));
-    cout << "Vertex property of node 1: " << graph.getVertexProperty(v1).getValue() << endl;
+    sort(pairs.begin(), pairs.end(), compare);
 
-    // Set edge property of edge (1, 2)
-    graph.setEdgeProperty(1, 2, EdgeProperty<int>(20));
-    cout << "Edge property of edge (1, 2): " << graph.getEdgeProperty(1, 2).getValue() << endl;
+    cout << "Coordinates:" << endl;
+    for (const auto &pair : pairs)
+    {
+        cout << pair.value->getName() << ", x: " << pair.x << ", y: " << pair.y << endl;
+    }
 
     return 0;
 }

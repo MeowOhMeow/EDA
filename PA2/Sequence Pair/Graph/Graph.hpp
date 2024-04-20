@@ -12,6 +12,7 @@
 #include "VertexProperty.hpp"
 #include "EdgeProperty.hpp"
 #include "Vertex.hpp"
+#include "NoProperty.hpp"
 
 using namespace std;
 
