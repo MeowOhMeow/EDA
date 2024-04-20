@@ -141,7 +141,6 @@ private:
 public:
     bool improving = true;
     bool run = true;
-    int warmUpCount = 0;
 
     double temperature = 1;
     double coolingRate = 0.95;
@@ -162,6 +161,8 @@ public:
     inline vector<string> makeRandomModification(vector<string> &expressions)
     {
         movesCount++;
+        int completeSteps = 100 * movesCount / (2 * n * k);
+        cout << "Progress: " << completeSteps << "% [" << string(completeSteps / 2, '=') << string(50 - completeSteps / 2, ' ') << "]\r" << flush;
         if (movesCount > 2 * n * k)
         {
             run = false;
@@ -191,8 +192,8 @@ public:
         SlicingTree tree(expressions, macrosMap);
         CombinationsOfMacros rootData = tree.getRootData();
         vector<pair<int, int>> dimensions = rootData.getDimensions();
-        int minArea = INT_MAX;
-        for (size_t i = 0; i < dimensions.size(); i++)
+        int minArea = max(dimensions[0].first, dimensions[0].second);
+        for (size_t i = 1; i < dimensions.size(); i++)
         {
             int area = max(dimensions[i].first, dimensions[i].second);
             if (area < minArea)
@@ -205,13 +206,6 @@ public:
 
     inline bool isImproving()
     {
-        warmUpCount++;
-        if (warmUpCount < n)
-        {
-            int completion = (warmUpCount * 100) / (n);
-            cout << "Warmming up..." << setw(4) << completion << "% [" << string(completion / 2, '=') << string(50 - completion / 2, ' ') << "]\r";
-            return true;
-        }
         temperature *= coolingRate;
         // check if the current state is improving
         if (rejectCount / movesCount > 0.95)

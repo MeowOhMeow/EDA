@@ -7,12 +7,6 @@
 
 using namespace std;
 
-// enum Direction
-// {
-//     ORIGINAL,
-//     ROTATED
-// };
-
 class CombinationsOfMacros
 {
 private:
@@ -22,7 +16,6 @@ private:
     string operatorChar = " ";
     vector<pair<int, int>> dimensions = {};
     vector<string> names = {};
-    // vector<Direction> directions = {};
     vector<pair<int, int>> combinationIndex = {};
 
     int offsetX = 0;
@@ -30,18 +23,38 @@ private:
 
     static void eliminateBadCombinations(CombinationsOfMacros &combinations)
     {
+        // Create a vector to mark combinations that should be removed
+        std::vector<bool> remove(combinations.dimensions.size(), false);
+
         for (size_t i = 0; i < combinations.dimensions.size(); i++)
         {
-            for (size_t j = 0; j < combinations.dimensions.size(); j++)
+            for (size_t j = i + 1; j < combinations.dimensions.size(); j++)
             {
-                if (i != j && combinations.dimensions[i].first <= combinations.dimensions[j].first && combinations.dimensions[i].second <= combinations.dimensions[j].second)
+                // Check if combination j dominates combination i
+                if (combinations.dimensions[i].first <= combinations.dimensions[j].first &&
+                    combinations.dimensions[i].second <= combinations.dimensions[j].second)
                 {
-                    combinations.dimensions.erase(combinations.dimensions.begin() + j);
-                    combinations.names.erase(combinations.names.begin() + j);
-                    // combinations.directions.erase(combinations.directions.begin() + j);
-                    combinations.combinationIndex.erase(combinations.combinationIndex.begin() + j);
-                    j--;
+                    // Mark combination i for removal
+                    remove[i] = true;
+                    break; // Move to the next i since i is dominated by j
                 }
+                // Check if combination i dominates combination j
+                else if (combinations.dimensions[i].first >= combinations.dimensions[j].first &&
+                         combinations.dimensions[i].second >= combinations.dimensions[j].second)
+                {
+                    // Mark combination j for removal
+                    remove[j] = true;
+                }
+            }
+        }
+
+        // Remove marked combinations in reverse order to avoid invalidating indices
+        for (int i = remove.size() - 1; i >= 0; i--)
+        {
+            if (remove[i])
+            {
+                combinations.dimensions.erase(combinations.dimensions.begin() + i);
+                combinations.combinationIndex.erase(combinations.combinationIndex.begin() + i);
             }
         }
     }
@@ -59,14 +72,11 @@ public:
             dimensions.push_back({h, w});
             names.push_back(n);
             names.push_back(n);
-            // directions.push_back(ORIGINAL);
-            // directions.push_back(ROTATED);
         }
         else
         {
             dimensions.push_back({w, h});
             names.push_back(n);
-            // directions.push_back(ORIGINAL);
         }
     }
 
@@ -80,14 +90,11 @@ public:
             dimensions.push_back({h, w});
             names.push_back(n);
             names.push_back(n);
-            // directions.push_back(ORIGINAL);
-            // directions.push_back(ROTATED);
         }
         else
         {
             dimensions.push_back({w, h});
             names.push_back(n);
-            // directions.push_back(ORIGINAL);
         }
     }
 
@@ -105,16 +112,6 @@ public:
     {
         return dimensions[index];
     }
-
-    // vector<Direction> getDirections() const
-    // {
-    //     return directions;
-    // }
-
-    // Direction getDirection(int index) const
-    // {
-    //     return directions[index];
-    // }
 
     vector<string> getNames() const
     {
@@ -163,11 +160,11 @@ public:
         {
             for (size_t j = 0; j < other.dimensions.size(); j++)
             {
-                string name = "(" + names[i] + HORIZONTAL + other.names[j] + ")";
+                // string name = " ";
                 int w = max(dimensions[i].first, other.dimensions[j].first);
                 int h = dimensions[i].second + other.dimensions[j].second;
                 result.dimensions.push_back({w, h});
-                result.names.push_back(name);
+                // result.names.push_back(name);
                 result.combinationIndex.push_back({i, j});
             }
         }
@@ -185,11 +182,11 @@ public:
         {
             for (size_t j = 0; j < other.dimensions.size(); j++)
             {
-                string name = "(" + names[i] + VERTICAL + other.names[j] + ")";
+                // string name = " ";
                 int w = dimensions[i].first + other.dimensions[j].first;
                 int h = max(dimensions[i].second, other.dimensions[j].second);
                 result.dimensions.push_back({w, h});
-                result.names.push_back(name);
+                // result.names.push_back(name);
                 result.combinationIndex.push_back({i, j});
             }
         }

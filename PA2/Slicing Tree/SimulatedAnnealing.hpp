@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <fstream>
 #include <iomanip>
+#include <limits>
+#include <cmath>
 
 #include "FloorPlanningProcedure.hpp"
 #include "SlicingTree.hpp"
@@ -51,7 +53,8 @@ public:
         vector<string> bestExpressions = tree.getExpressions();
         vector<string> currentExpressions = tree.getExpressions();
         float bestCost = procedure.evaluateState(bestExpressions, macrosMap);
-
+        float currentCost = bestCost;
+        logFile << "Initial cost: " << bestCost << endl;
         logFile << "Expression size: " << bestExpressions.size() << endl;
         logFile << setw(10) << "Time" << setw(10) << "Steps" << setw(20) << "Cost" << endl;
 
@@ -70,15 +73,17 @@ public:
                 if (newCost <= bestCost)
                 {
                     bestCost = newCost;
+                    currentCost = newCost;
                     bestExpressions = newExpressions;
                     currentExpressions = newExpressions;
                     procedure.accept();
                 }
                 else
                 {
-                    float acceptanceProbability = exp((bestCost - newCost) / procedure.getTemperature());
+                    float acceptanceProbability = exp((currentCost - newCost) / procedure.getTemperature());
                     if (acceptanceProbability > procedure.getRandomNumber(0.0f, 1.0f))
                     {
+                        currentCost = newCost;
                         currentExpressions = newExpressions;
                         procedure.uphill();
                     }

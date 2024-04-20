@@ -5,10 +5,10 @@
 #include <stack>
 #include <unordered_map>
 #include <fstream>
-#include <queue>
 #include <vector>
 #include <string>
 #include <random>
+#include <chrono>
 
 #include "BinaryTree.hpp"
 #include "CombinationsOfMacros.hpp"
@@ -29,44 +29,32 @@ private:
 
     using NodePtr = typename BinaryTree<CombinationsOfMacros>::Node *;
 
-    // use queue to build a balanced tree
     NodePtr build(vector<CombinationsOfMacros> &macros)
     {
-        queue<NodePtr> q;
+        stack<NodePtr> stack;
         for (size_t i = 0; i < macros.size(); i++)
         {
-            q.push(new typename BinaryTree<CombinationsOfMacros>::Node(macros[i]));
+            stack.push(new typename BinaryTree<CombinationsOfMacros>::Node(macros[i]));
         }
 
-        while (q.size() > 1)
+        while (stack.size() > 1)
         {
-            NodePtr left = q.front();
-            q.pop();
-            NodePtr right = q.front();
-            q.pop();
+            NodePtr right = stack.top();
+            stack.pop();
+            NodePtr left = stack.top();
+            stack.pop();
 
-            if (rand() % 2)
-            {
-                NodePtr mulNode = new typename BinaryTree<CombinationsOfMacros>::Node(left->data * right->data);
-                mulNode->left = left;
-                mulNode->right = right;
+            NodePtr addNode = new typename BinaryTree<CombinationsOfMacros>::Node(left->data + right->data);
+            addNode->left = left;
+            addNode->right = right;
 
-                q.push(mulNode);
-            }
-            else
-            {
-                NodePtr addNode = new typename BinaryTree<CombinationsOfMacros>::Node(left->data + right->data);
-                addNode->left = left;
-                addNode->right = right;
-
-                q.push(addNode);
-            }
+            stack.push(addNode);
         }
 
-        return q.front();
+        return stack.top();
     }
 
-    vector<string> getExpressions(NodePtr node, vector<string> &expression)
+    void getExpressions(NodePtr node, vector<string> &expression)
     {
         if (node != nullptr)
         {
@@ -74,8 +62,6 @@ private:
             getExpressions(node->right, expression);
             expression.push_back(node->data.toString());
         }
-
-        return expression;
     }
 
     void reconstruct(NodePtr node, ofstream &fout, int index, pair<int, int> &offset)
@@ -174,7 +160,8 @@ public:
     vector<string> getExpressions()
     {
         vector<string> expression;
-        return getExpressions(this->root, expression);
+        getExpressions(this->root, expression);
+        return expression;
     }
 
     void saveToFile(string filename)
