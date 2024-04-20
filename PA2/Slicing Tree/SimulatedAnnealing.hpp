@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <limits>
 #include <cmath>
+#include <chrono>
+#include <string>
 
 #include "FloorPlanningProcedure.hpp"
 #include "SlicingTree.hpp"
@@ -31,7 +33,10 @@ public:
         this->coolingRate = coolingRate;
         this->absoluteTemperature = absoluteTemperature;
         this->iterations = iterations;
-        logFile.open("sa.log");
+        // get current date and time
+        auto now = chrono::system_clock::now();
+        string filename = "logs/" + to_string(chrono::system_clock::to_time_t(now)) + ".log";
+        logFile.open(filename);
         logFile << "temperature: " << temperature << endl;
         logFile << "coolingRate: " << coolingRate << endl;
         logFile << "absoluteTemperature: " << absoluteTemperature << endl;

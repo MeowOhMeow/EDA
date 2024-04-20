@@ -56,25 +56,25 @@ int main(int argc, char *argv[])
     if (argc != 3)
     {
         cout << "Usage: " << argv[0] << " <inputfile> <outputfile>" << endl;
-        // return 1;
+        return 1;
     }
     // create a tree from the input file
     unordered_map<string, pair<int, int>> macrosMap;
-    vector<CombinationsOfMacros> macros = createTree("../testcases/floorplan_30.txt", macrosMap);
+    vector<CombinationsOfMacros> macros = createTree(argv[1], macrosMap);
     SlicingTree tree(macros);
     CombinationsOfMacros data = tree.getRootData();
 
     // create a procedure for sa
     FloorPlanningProcedure procedure;
     // create a simulated annealing object
-    SimulatedAnnealing sa(1, 0.9, 0.1, 7);
+    SimulatedAnnealing sa(1e5, 0.95, 0.1, 7);
     // run the simulated annealing algorithm
     vector<string> bestExpressions = sa.run(tree, procedure, macrosMap);
 
     // create a tree from the best expressions
     SlicingTree bestTree(bestExpressions, macrosMap);
-    bestTree.saveToFile("../testcases/output.txt");
-    // cout << "Output saved to " << argv[2] << endl;
+    bestTree.saveToFile(argv[2]);
+    cout << "Output saved to " << argv[2] << endl;
     cout << "See sa.log for more details" << endl;
     return 0;
 }
