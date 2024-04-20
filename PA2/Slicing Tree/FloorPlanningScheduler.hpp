@@ -1,5 +1,5 @@
-#ifndef FLOORPLANNINGPROCEDURE_HPP
-#define FLOORPLANNINGPROCEDURE_HPP
+#ifndef FLOORPLANNINGSCHEDULER_HPP
+#define FLOORPLANNINGSCHEDULER_HPP
 
 #include <iostream>
 #include <random>
@@ -9,27 +9,26 @@
 
 #include "SlicingTree.hpp"
 #include "CombinationsOfMacros.hpp"
+#include "Constants.hpp"
 
 using namespace std;
+using namespace Constants;
 
-const int M1 = 0;
-const int M2 = 1;
-const int M3 = 2;
-
-const int NUM_MOVES = 3;
-
-class FloorPlanningProcedure
+class FloorPlanningScheduler
 {
 private:
-    const string HORIZONTAL = "+";
-    const string VERTICAL = "*";
-
     std::chrono::high_resolution_clock::time_point end;
 
     int n, k;
     int movesCount = 0;
     int uphillCount = 0;
     int rejectCount = 0;
+
+    bool improving = true;
+    bool run = true;
+
+    double temperature = 1;
+    double coolingRate = 0.95;
 
     // Swap two adjacent operands.
     vector<string> move1(vector<string> &expressions)
@@ -139,13 +138,7 @@ private:
     }
 
 public:
-    bool improving = true;
-    bool run = true;
-
-    double temperature = 1;
-    double coolingRate = 0.95;
-
-    FloorPlanningProcedure()
+    FloorPlanningScheduler()
     {
         end = chrono::high_resolution_clock::now() + chrono::minutes(10);
     }
@@ -158,6 +151,28 @@ public:
         uphillCount = 0;
     }
 
+    // Setters
+    inline void setN(int n)
+    {
+        this->n = n;
+    }
+
+    inline void setK(int k)
+    {
+        this->k = k;
+    }
+
+    inline void setTemperature(double temperature)
+    {
+        this->temperature = temperature;
+    }
+
+    inline void setCoolingRate(double coolingRate)
+    {
+        this->coolingRate = coolingRate;
+    }
+
+    // event handlers
     inline vector<string> makeRandomModification(vector<string> &expressions)
     {
         movesCount++;
@@ -204,45 +219,8 @@ public:
         return minArea;
     }
 
-    inline bool isImproving()
-    {
-        temperature *= coolingRate;
-        // check if the current state is improving
-        if (rejectCount / movesCount > 0.95)
-        {
-            improving = false;
-        }
-        return improving;
-    }
-
-    inline bool hasTimeExpired()
-    {
-        // check if there is still time left
-        return chrono::high_resolution_clock::now() >= end;
-    }
-
-    inline void setN(int n)
-    {
-        this->n = n;
-    }
-
-    inline void setK(int k)
-    {
-        this->k = k;
-    }
-
     inline void accept()
     {
-    }
-
-    inline void setTemperature(double temperature)
-    {
-        this->temperature = temperature;
-    }
-
-    inline void setCoolingRate(double coolingRate)
-    {
-        this->coolingRate = coolingRate;
     }
 
     inline void uphill()
@@ -257,6 +235,40 @@ public:
     inline void reject()
     {
         rejectCount++;
+    }
+
+    // scheduling functions
+    inline bool isImproving()
+    {
+        temperature *= coolingRate;
+        // check if the current state is improving
+        if (rejectCount / movesCount > 0.95)
+        {
+            improving = false;
+        }
+        return improving;
+    }
+
+    inline bool canContinue()
+    {
+        return run;
+    }
+
+    inline bool hasTimeExpired()
+    {
+        // check if there is still time left
+        return chrono::high_resolution_clock::now() >= end;
+    }
+
+    // in seconds
+    inline int getRemainingTime()
+    {
+        return chrono::duration_cast<chrono::seconds>(end - chrono::high_resolution_clock::now()).count();
+    }
+
+    inline double getTemperature()
+    {
+        return temperature;
     }
 
     // random generator, range: [min, max]
@@ -275,17 +287,6 @@ public:
         uniform_real_distribution<float> dis(min, max);
         return dis(gen);
     }
-
-    // in seconds
-    inline int getRemainingTime()
-    {
-        return chrono::duration_cast<chrono::seconds>(end - chrono::high_resolution_clock::now()).count();
-    }
-
-    inline double getTemperature()
-    {
-        return temperature;
-    }
 };
 
-#endif // FLOORPLANNINGPROCEDURE_HPP
+#endif // FLOORPLANNINGSCHEDULER_HPP

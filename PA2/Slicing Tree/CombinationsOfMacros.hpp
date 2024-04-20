@@ -5,21 +5,18 @@
 #include <vector>
 #include <string>
 
+#include "Constants.hpp"
+
 using namespace std;
+using namespace Constants;
 
 class CombinationsOfMacros
 {
 private:
-    const string HORIZONTAL = "+";
-    const string VERTICAL = "*";
-
     string operatorChar = " ";
     vector<pair<int, int>> dimensions = {};
     vector<string> names = {};
     vector<pair<int, int>> combinationIndex = {};
-
-    int offsetX = 0;
-    int offsetY = 0;
 
     static void eliminateBadCombinations(CombinationsOfMacros &combinations)
     {

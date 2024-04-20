@@ -8,7 +8,7 @@
 #include "SlicingTree.hpp"
 #include "CombinationsOfMacros.hpp"
 #include "SimulatedAnnealing.hpp"
-#include "FloorPlanningProcedure.hpp"
+#include "FloorPlanningScheduler.hpp"
 
 using namespace std;
 
@@ -24,7 +24,7 @@ vector<string> split(string str, char delim)
     return res;
 }
 
-vector<CombinationsOfMacros> createTree(string filename, unordered_map<string, pair<int, int>> &macrosMap)
+vector<CombinationsOfMacros> getMacros(string filename, unordered_map<string, pair<int, int>> &macrosMap)
 {
     vector<CombinationsOfMacros> macros;
     ifstream file(filename);
@@ -60,12 +60,12 @@ int main(int argc, char *argv[])
     }
     // create a tree from the input file
     unordered_map<string, pair<int, int>> macrosMap;
-    vector<CombinationsOfMacros> macros = createTree(argv[1], macrosMap);
+    vector<CombinationsOfMacros> macros = getMacros(argv[1], macrosMap);
     SlicingTree tree(macros);
     CombinationsOfMacros data = tree.getRootData();
 
     // create a procedure for sa
-    FloorPlanningProcedure procedure;
+    FloorPlanningScheduler procedure;
     // create a simulated annealing object
     SimulatedAnnealing sa(1e5, 0.95, 0.1, 7);
     // run the simulated annealing algorithm
@@ -75,6 +75,6 @@ int main(int argc, char *argv[])
     SlicingTree bestTree(bestExpressions, macrosMap);
     bestTree.saveToFile(argv[2]);
     cout << "Output saved to " << argv[2] << endl;
-    cout << "See sa.log for more details" << endl;
+    cout << "See " << sa.getLogFilename() << " for more details." << endl;
     return 0;
 }

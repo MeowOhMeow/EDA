@@ -9,8 +9,10 @@
 #include <cmath>
 #include <chrono>
 #include <string>
+#include <vector>
+#include <sstream>
 
-#include "FloorPlanningProcedure.hpp"
+#include "FloorPlanningScheduler.hpp"
 #include "SlicingTree.hpp"
 
 using namespace std;
@@ -20,6 +22,7 @@ class SimulatedAnnealing
 private:
     double temperature, coolingRate, absoluteTemperature;
     int iterations;
+    string filename;
     ofstream logFile;
 
 public:
@@ -35,7 +38,10 @@ public:
         this->iterations = iterations;
         // get current date and time
         auto now = chrono::system_clock::now();
-        string filename = "logs/" + to_string(chrono::system_clock::to_time_t(now)) + ".log";
+        auto in_time_t = chrono::system_clock::to_time_t(now);
+        stringstream ss;
+        ss << put_time(localtime(&in_time_t), "%H-%M-%S");
+        filename = "logs/" + ss.str() + ".log";
         logFile.open(filename);
         logFile << "temperature: " << temperature << endl;
         logFile << "coolingRate: " << coolingRate << endl;
@@ -48,9 +54,14 @@ public:
         logFile.close();
     }
 
-    vector<string> run(SlicingTree &tree, FloorPlanningProcedure &procedure, unordered_map<string, pair<int, int>> &macrosMap)
+    string getLogFilename()
     {
-        procedure.setN(sizeOfBlocks);
+        return filename;
+    }
+
+    vector<string> run(SlicingTree &tree, FloorPlanningScheduler &procedure, unordered_map<string, pair<int, int>> &macrosMap)
+    {
+        procedure.setN(tree.getSize());
         procedure.setK(iterations);
         procedure.setTemperature(temperature);
         procedure.setCoolingRate(coolingRate);
@@ -68,7 +79,7 @@ public:
         do
         {
             procedure.initialize();
-            while (procedure.run)
+            while (procedure.canContinue())
             {
                 // make a random modification to the current tree (state)
                 vector<string> newExpressions = procedure.makeRandomModification(currentExpressions);

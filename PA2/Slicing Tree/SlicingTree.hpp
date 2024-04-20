@@ -12,10 +12,10 @@
 
 #include "BinaryTree.hpp"
 #include "CombinationsOfMacros.hpp"
+#include "Constants.hpp"
 
 using namespace std;
-
-int sizeOfBlocks = 0;
+using namespace Constants;
 
 /*
  * SlicingTree class
@@ -24,8 +24,7 @@ int sizeOfBlocks = 0;
 class SlicingTree : public BinaryTree<CombinationsOfMacros>
 {
 private:
-    const string HORIZONTAL = "+";
-    const string VERTICAL = "*";
+    int sizeOfBlocks = 0;
 
     using NodePtr = typename BinaryTree<CombinationsOfMacros>::Node *;
 
@@ -100,7 +99,7 @@ private:
 protected:
     void insert(NodePtr &node, CombinationsOfMacros data) override
     {
-        cout << "Method not implemented" << endl;
+        cerr << "Method not implemented" << endl;
     }
 
 public:
@@ -189,6 +188,11 @@ public:
         pair<int, int> offset = {0, 0};
         reconstruct(this->root, fout, index, offset);
         fout.close();
+    }
+
+    int getSize()
+    {
+        return sizeOfBlocks;
     }
 };
 
