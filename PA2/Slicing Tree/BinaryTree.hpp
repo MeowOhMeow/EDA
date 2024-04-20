@@ -7,22 +7,22 @@
 
 using namespace std;
 
-template <typename T>
+template <typename VertexData>
 class BinaryTree
 {
 protected:
     struct Node
     {
-        T data;
+        VertexData data;
         Node *left;
         Node *right;
 
-        Node(T data = T(), Node *left = nullptr, Node *right = nullptr) : data(data), left(left), right(right) {}
+        Node(VertexData data = T(), Node *left = nullptr, Node *right = nullptr) : data(data), left(left), right(right) {}
     };
 
     Node *root;
 
-    virtual void insert(Node *&node, T data) = 0;
+    virtual void insert(Node *&node, VertexData data) = 0;
 
     void print(Node *node)
     {
@@ -75,7 +75,7 @@ protected:
         }
     }
 
-    void inOrder(Node *node, vector<T> &v)
+    void inOrder(Node *node, vector<VertexData> &v)
     {
         if (node != nullptr)
         {
@@ -85,7 +85,7 @@ protected:
         }
     }
 
-    void preOrder(Node *node, vector<T> &v)
+    void preOrder(Node *node, vector<VertexData> &v)
     {
         if (node != nullptr)
         {
@@ -95,7 +95,7 @@ protected:
         }
     }
 
-    void postOrder(Node *node, vector<T> &v)
+    void postOrder(Node *node, vector<VertexData> &v)
     {
         if (node != nullptr)
         {
@@ -116,7 +116,7 @@ public:
         destroy(root);
     }
 
-    void insert(T data)
+    void insert(VertexData data)
     {
         insert(root, data);
     }
@@ -132,23 +132,23 @@ public:
         printStructure(root, 0);
     }
 
-    vector<T> inOrder()
+    vector<VertexData> inOrder()
     {
-        vector<T> v;
+        vector<VertexData> v;
         inOrder(root, v);
         return v;
     }
 
-    vector<T> preOrder()
+    vector<VertexData> preOrder()
     {
-        vector<T> v;
+        vector<VertexData> v;
         preOrder(root, v);
         return v;
     }
 
-    vector<T> postOrder()
+    vector<VertexData> postOrder()
     {
-        vector<T> v;
+        vector<VertexData> v;
         postOrder(root, v);
         return v;
     }
