@@ -5,6 +5,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <algorithm>
+#include <chrono>
 
 #include "Macro.hpp"
 #include "Scheduler.hpp"
@@ -57,12 +58,29 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // get current date and time
+    auto now = chrono::system_clock::now();
+    auto in_time_t = chrono::system_clock::to_time_t(now);
+    stringstream ss;
+    ss << put_time(localtime(&in_time_t), "%Y-%m-%d_%H-%M-%S");
+    string filename = "logs/" + ss.str() + ".log";
+    ofstream logFile;
+    logFile.open(filename);
+    logFile << "Start time: " << put_time(localtime(&in_time_t), "%Y-%m-%d %H:%M:%S") << endl;
+    logFile << "Input file: " << argv[1] << endl;
+    logFile << "Output file: " << argv[2] << endl;
+    logFile.close();
+
     vector<Macro> macros = getMacros(argv[1]);
 
     Scheduler scheduler(macros);
 
-    SimulatedAnnealing sa(1e5, 0.85, 0.01, 7);
+    SimulatedAnnealing sa(1e5, 0.85, 0.01, 7, filename);
     sa.run(scheduler);
+
+    in_time_t = chrono::system_clock::to_time_t(chrono::system_clock::now());
+    logFile.open(filename, ios::app);
+    logFile << "End time: " << put_time(localtime(&in_time_t), "%Y-%m-%d %H:%M:%S") << endl;
 
     scheduler.saveFloorplan(argv[2]);
     cout << "Output saved to " << argv[2] << endl;

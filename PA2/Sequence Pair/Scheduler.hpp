@@ -245,6 +245,11 @@ public:
         return temperature;
     }
 
+    inline int getStepPerIteration()
+    {
+        return 2 * numNodes * k;
+    }
+
     // random generator, range: [min, max]
     inline int getRandomNumber(int min, int max)
     {

@@ -29,23 +29,15 @@ public:
         double temperature = 1,
         double coolingRate = 0.95,
         double absoluteTemperature = 0.01,
-        int iterations = 7)
+        int iterations = 7,
+        string filename = "log.txt") 
     {
         this->temperature = temperature;
         this->coolingRate = coolingRate;
         this->absoluteTemperature = absoluteTemperature;
         this->iterations = iterations;
-        // get current date and time
-        auto now = chrono::system_clock::now();
-        auto in_time_t = chrono::system_clock::to_time_t(now);
-        stringstream ss;
-        ss << put_time(localtime(&in_time_t), "%H-%M-%S");
-        filename = "logs/" + ss.str() + ".log";
-        logFile.open(filename);
-        logFile << "temperature: " << temperature << endl;
-        logFile << "coolingRate: " << coolingRate << endl;
-        logFile << "absoluteTemperature: " << absoluteTemperature << endl;
-        logFile << "iterations: " << iterations << endl;
+        this->filename = filename;
+        logFile.open(filename, ios::app);
     }
 
     ~SimulatedAnnealing()
@@ -60,9 +52,15 @@ public:
 
     void run(Scheduler &scheduler)
     {
+        logFile << "temperature: " << temperature << endl;
+        logFile << "coolingRate: " << coolingRate << endl;
+        logFile << "absoluteTemperature: " << absoluteTemperature << endl;
+        logFile << "iterations: " << iterations << endl;
+
         scheduler.setTemperature(temperature);
         scheduler.setCoolingRate(coolingRate);
         int totalIterations = log2(absoluteTemperature / temperature) / log2(coolingRate);
+        int stepPerIteration = scheduler.getStepPerIteration();
         int currentIteration = 0;
 
         float bestCost = scheduler.evaluateState();
@@ -106,7 +104,8 @@ public:
             }
             currentIteration++;
             int completeSteps = 100 * currentIteration / totalIterations;
-            cout << "Progress: " << completeSteps << "% [" << string(completeSteps / 2, '=') << string(50 - completeSteps / 2, ' ') << "]\r" << flush;
+            int ETA = max(max(totalIterations - currentIteration, 0) * stepPerIteration, 0) * (scheduler.getElapsed() / float(steps + 1));
+            cout << "Progress: " << completeSteps << "% [" << string(completeSteps / 2, '=') << string(50 - completeSteps / 2, ' ') << "] ETA: " << ETA << "s   " << "\r" << flush;
 
             logFile << setw(10) << scheduler.getElapsed() << setw(10) << steps << setw(20) << bestCost << endl;
         } while (scheduler.isImproving() && !scheduler.hasTimeExpired() && scheduler.getTemperature() > absoluteTemperature);
