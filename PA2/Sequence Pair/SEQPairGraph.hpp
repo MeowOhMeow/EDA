@@ -106,10 +106,12 @@ private:
             if (i != v1)
             {
                 checkAndAddEdge(i, v1);
+                checkAndAddEdge(v1, i);
             }
             if (i != v2)
             {
                 checkAndAddEdge(i, v2);
+                checkAndAddEdge(v2, i);
             }
         }
         // Add edges from source to v1 and v2
