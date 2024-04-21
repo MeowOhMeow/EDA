@@ -7,23 +7,10 @@
 #include <algorithm>
 
 #include "Macro.hpp"
+#include "SEQPairGraph.hpp"
+#include "Coordinates.hpp"
 
 using namespace std;
-
-struct KeyValuePair
-{
-    int key;
-    int x;
-    int y;
-    Macro *value;
-
-    KeyValuePair(int x, int y, Macro *value) : key(x + y), x(x), y(y), value(value) {}
-};
-
-bool compare(KeyValuePair &a, KeyValuePair &b)
-{
-    return a.key < b.key;
-}
 
 vector<string> split(string str, char delim)
 {
@@ -62,54 +49,32 @@ vector<Macro> getMacros(string filename)
     return macros;
 }
 
-vector<pair<int, int>> getCoordinates(vector<int> &seq1, vector<int> &seq2)
-{
-    vector<pair<int, int>> coordinates;
-    unordered_map<int, int> seq2_map;
-    // Create a mapping of elements in seq2 to their indices
-    for (int i = 0; i < seq2.size(); i++)
-    {
-        seq2_map[seq2[i]] = i;
-    }
-
-    // Generate coordinates based on seq1 and seq2_map
-    for (int i = 0; i < seq1.size(); i++)
-    {
-        if (seq2_map.find(seq1[i]) != seq2_map.end())
-        {
-            coordinates.push_back({i, seq2_map[seq1[i]]});
-        }
-    }
-
-    return coordinates;
-}
-
 int main()
 {
     vector<Macro> macros = getMacros("../testcases/floorplan_6.txt");
-    cout << "Macros:" << endl;
-    for (const auto &macro : macros)
+    vector<int> macroWidths, macroHeights;
+    for (Macro &macro : macros)
     {
-        macro.print();
-    }
-    cout << endl;
-
-    vector<int> seq1 = {0, 1, 3, 4, 2, 5};
-    vector<int> seq2 = {2, 1, 5, 0, 3, 4};
-    vector<pair<int, int>> coordinates = getCoordinates(seq1, seq2);
-    vector<KeyValuePair> pairs;
-    for (size_t i = 0; i < coordinates.size(); i++)
-    {
-        cout << "x: " << coordinates[i].first << " y: " << coordinates[i].second << endl;
-        pairs.push_back(KeyValuePair(coordinates[i].first, coordinates[i].second, &macros[seq1[i]]));
+        macroWidths.push_back(macro.getWidth());
+        macroHeights.push_back(macro.getHeight());
     }
 
-    sort(pairs.begin(), pairs.end(), compare);
+    SequencePairGraph horizontalGraph(macroWidths);
 
-    cout << "Coordinates:" << endl;
-    for (const auto &pair : pairs)
+    cout << "Vertex Properties: " << endl;
+    for (int i = 0; i < horizontalGraph.size(); i++)
     {
-        cout << pair.value->getName() << ", x: " << pair.x << ", y: " << pair.y << endl;
+        Coordinates<int> *coord = horizontalGraph.getVertexProperty(i).getValue();
+        cout << "Vertex " << i << ": " << coord->getX() << " " << coord->getY() << " Width: " << *coord->getValue() << endl;
+        coord->setValue(new int(10));
+        coord->setX(100);
+    }
+
+    cout << "Vertex Properties after modification: " << endl;
+    for (int i = 0; i < horizontalGraph.size(); i++)
+    {
+        Coordinates<int> *coord = horizontalGraph.getVertexProperty(i).getValue();
+        cout << "Vertex " << i << ": " << coord->getX() << " " << coord->getY() << " Width: " << *coord->getValue() << endl;
     }
 
     return 0;

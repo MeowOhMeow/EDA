@@ -13,13 +13,14 @@ private:
     int height;
 
 public:
+    Macro() : name(""), width(0), height(0) {}
     Macro(string name, int width, int height) : name(name), width(width), height(height) {}
 
     string getName() const
     {
         return name;
     }
-    
+
     int getWidth() const
     {
         return width;

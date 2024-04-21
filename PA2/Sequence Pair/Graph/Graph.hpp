@@ -24,14 +24,15 @@ private:
     EdgeProperty<EdgeData> emptyEdgeProperty = EdgeProperty<EdgeData>();
     VertexProperty<VertexData> emptyVertexProperty = VertexProperty<VertexData>();
 
-    vector<map<int, float>> adjacencyList;
+    vector<map<int, float>> outEdgesList, inEdgesList;
     vector<VertexProperty<VertexData>> vertexPropertiesMap;
     vector<unordered_map<int, EdgeProperty<EdgeData>>> edgePropertiesMap;
 
 public:
     // Constructor
     Graph(int numNodes)
-        : adjacencyList(numNodes),
+        : outEdgesList(numNodes),
+          inEdgesList(numNodes),
           edgePropertiesMap(numNodes)
     {
         for (int i = 0; i < numNodes; ++i)
@@ -66,7 +67,8 @@ public:
     // Method to add a directed edge
     void addDirectedEdge(int source, int target, float weight)
     {
-        adjacencyList[source][target] = weight;
+        outEdgesList[source][target] = weight;
+        inEdgesList[target][source] = weight;
         edgePropertiesMap[source][target] = emptyEdgeProperty;
     }
 
@@ -94,8 +96,8 @@ public:
     // Method to get edge weight
     float getEdgeWeight(int source, int target) const
     {
-        auto it = adjacencyList[source].find(target);
-        if (it != adjacencyList[source].end())
+        auto it = outEdgesList[source].find(target);
+        if (it != outEdgesList[source].end())
         {
             return it->second;
         }
@@ -111,7 +113,7 @@ public:
     vector<int> getNeighbors(int vertex) const
     {
         vector<int> neighbors;
-        for (const auto &neighbor : adjacencyList[vertex])
+        for (const auto &neighbor : outEdgesList[vertex])
         {
             neighbors.push_back(neighbor.first);
         }
@@ -151,7 +153,8 @@ public:
     // Method to set edge weight
     void setEdgeWeight(int source, int target, float weight)
     {
-        adjacencyList[source][target] = weight;
+        outEdgesList[source][target] = weight;
+        inEdgesList[target][source] = weight;
     }
 
     void setEdgeWeight(const Vertex &source, const Vertex &target, float weight)
@@ -174,7 +177,7 @@ public:
     vector<pair<int, float>> getOutEdges(int vertex) const
     {
         vector<pair<int, float>> outEdges;
-        for (const auto &edge : adjacencyList[vertex])
+        for (const auto &edge : outEdgesList[vertex])
         {
             outEdges.emplace_back(edge.first, edge.second);
         }
@@ -190,13 +193,9 @@ public:
     vector<pair<int, float>> getInEdges(int vertex) const
     {
         vector<pair<int, float>> inEdges;
-        for (size_t i = 0; i < adjacencyList.size(); ++i)
+        for (const auto &edge : inEdgesList[vertex])
         {
-            auto it = adjacencyList[i].find(vertex);
-            if (it != adjacencyList[i].end())
-            {
-                inEdges.emplace_back(i, it->second);
-            }
+            inEdges.emplace_back(edge.first, edge.second);
         }
         return inEdges;
     }
@@ -208,13 +207,24 @@ public:
 
     vector<map<int, float>> getAdjacencyList() const
     {
-        return adjacencyList;
+        return outEdgesList;
+    }
+
+    void clearEdges(int vertex)
+    {
+        outEdgesList[vertex].clear();
+        inEdgesList[vertex].clear();
+    }
+
+    void clearEdges(const Vertex &vertex)
+    {
+        clearEdges(vertex.getId());
     }
 
     // Method to get size
     int size() const
     {
-        return adjacencyList.size();
+        return outEdgesList.size();
     }
 };
 
