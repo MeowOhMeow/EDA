@@ -54,18 +54,18 @@ int main(int argc, char *argv[])
     if (argc != 3)
     {
         cout << "Usage: " << argv[0] << " <inputfile> <outputfile>" << endl;
-        // return 1;
+        return 1;
     }
 
-    vector<Macro> macros = getMacros("../testcases/floorplan_100.txt");
+    vector<Macro> macros = getMacros(argv[1]);
 
     Scheduler scheduler(macros);
 
-    SimulatedAnnealing sa(1, 0.85, 0.01, 7);
+    SimulatedAnnealing sa(1e5, 0.85, 0.01, 7);
     sa.run(scheduler);
 
-    scheduler.saveFloorplan("../testcases/output.txt");
-    // cout << "Output saved to " << argv[2] << endl;
+    scheduler.saveFloorplan(argv[2]);
+    cout << "Output saved to " << argv[2] << endl;
     cout << "See " << sa.getLogFilename() << " for more details." << endl;
     return 0;
 }

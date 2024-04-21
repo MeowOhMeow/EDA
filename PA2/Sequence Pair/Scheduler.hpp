@@ -32,7 +32,7 @@ enum Moves
 class Scheduler
 {
 private:
-    chrono::high_resolution_clock::time_point end;
+    chrono::high_resolution_clock::time_point start, end;
 
     SequencePairGraph *horizontalGraph, *verticalGraph;
 
@@ -92,7 +92,8 @@ private:
 public:
     Scheduler(vector<Macro> &macros, int k = 7) : k(k), macros(macros)
     {
-        end = chrono::high_resolution_clock::now() + chrono::minutes(10);
+        start = chrono::high_resolution_clock::now();
+        end = start + chrono::minutes(10);
 
         numNodes = macros.size();
 
@@ -135,8 +136,6 @@ public:
     inline void makeRandomModification()
     {
         movesCount++;
-        int completeSteps = 100 * movesCount / (2 * numNodes * k);
-        cout << "Progress: " << completeSteps << "% [" << string(completeSteps / 2, '=') << string(50 - completeSteps / 2, ' ') << "]\r" << flush;
         if (movesCount > 2 * numNodes * k)
         {
             run = false;
@@ -236,9 +235,9 @@ public:
     }
 
     // in seconds
-    inline int getRemainingTime()
+    inline int getElapsed()
     {
-        return chrono::duration_cast<chrono::seconds>(end - chrono::high_resolution_clock::now()).count();
+        return chrono::duration_cast<chrono::seconds>(chrono::high_resolution_clock::now() - start).count();
     }
 
     inline double getTemperature()

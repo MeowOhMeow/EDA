@@ -1,7 +1,7 @@
 #ifndef NOPROPERTY_HPP
 #define NOPROPERTY_HPP
 
-class  NoProperty
+class NoProperty
 {
 public:
     NoProperty() {}

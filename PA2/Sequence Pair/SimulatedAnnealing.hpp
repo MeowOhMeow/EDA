@@ -62,6 +62,8 @@ public:
     {
         scheduler.setTemperature(temperature);
         scheduler.setCoolingRate(coolingRate);
+        int totalIterations = log2(absoluteTemperature / temperature) / log2(coolingRate);
+        int currentIteration = 0;
 
         float bestCost = scheduler.evaluateState();
         float currentCost = bestCost;
@@ -102,8 +104,11 @@ public:
 
                 steps++;
             }
+            currentIteration++;
+            int completeSteps = 100 * currentIteration / totalIterations;
+            cout << "Progress: " << completeSteps << "% [" << string(completeSteps / 2, '=') << string(50 - completeSteps / 2, ' ') << "]\r" << flush;
 
-            logFile << setw(10) << scheduler.getRemainingTime() << setw(10) << steps << setw(20) << bestCost << endl;
+            logFile << setw(10) << scheduler.getElapsed() << setw(10) << steps << setw(20) << bestCost << endl;
         } while (scheduler.isImproving() && !scheduler.hasTimeExpired() && scheduler.getTemperature() > absoluteTemperature);
 
         if (scheduler.hasTimeExpired())

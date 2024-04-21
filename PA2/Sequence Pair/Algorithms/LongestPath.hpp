@@ -19,8 +19,6 @@ template <class VertexData, class EdgeData>
 class LongestPath
 {
 private:
-
-
 public:
     // Method to perform longest path
     static vector<float> find(Graph<VertexData, EdgeData> &graph)
@@ -29,7 +27,7 @@ public:
         vector<float> distances(graph.size(), -numeric_limits<float>::infinity());
         distances[topologicalOrder[0]] = 0;
 
-        for (int i = 0; i < topologicalOrder.size(); ++i)
+        for (size_t i = 0; i < topologicalOrder.size(); ++i)
         {
             int node = topologicalOrder[i];
             vector<pair<int, float>> inEdges = graph.getInEdges(Vertex(node));
@@ -48,7 +46,7 @@ public:
         vector<float> distances(graph.size(), -numeric_limits<float>::infinity());
         distances[topologicalOrder[0]] = 0;
 
-        for (int i = 0; i < topologicalOrder.size(); ++i)
+        for (size_t i = 0; i < topologicalOrder.size(); ++i)
         {
             int node = topologicalOrder[i];
             vector<pair<int, float>> inEdges = graph.getInEdges(Vertex(node));

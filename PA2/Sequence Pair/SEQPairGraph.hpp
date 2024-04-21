@@ -46,13 +46,13 @@ private:
         vector<pair<int, int>> coordinates;
         unordered_map<int, int> seq2_map;
         // Create a mapping of elements in seq2 to their indices
-        for (int i = 0; i < seqY.size(); i++)
+        for (size_t i = 0; i < seqY.size(); i++)
         {
             seq2_map[seqY[i]] = i;
         }
 
         // Generate coordinates based on seq1 and seq2_map
-        for (int i = 0; i < seqX.size(); i++)
+        for (size_t i = 0; i < seqX.size(); i++)
         {
             if (seq2_map.find(seqX[i]) != seq2_map.end())
             {
@@ -200,7 +200,7 @@ public:
 
         swap(seqX[pos1], seqX[pos2]);
         int left, right;
-        for (int i = 0; i < seqY.size(); i++)
+        for (size_t i = 0; i < seqY.size(); i++)
         {
             if (seqY[i] == v1)
             {
