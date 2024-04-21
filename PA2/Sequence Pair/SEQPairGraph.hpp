@@ -123,6 +123,7 @@ private:
     }
 
 public:
+    SequencePairGraph() : Graph<Coordinates<int> *, NoProperty>(0) {}
     // Constructor
     SequencePairGraph(vector<int> &macroSizes, bool isVertical = false)
         : Graph<Coordinates<int> *, NoProperty>(macroSizes.size() + 2), macroSizes(macroSizes)
@@ -144,7 +145,7 @@ public:
             int x = coordinates[i].first;
             int y = coordinates[i].second;
 
-            setVertexProperty(i, new Coordinates<int>(x, y, macroSizes[seqX[x]]));
+            setVertexProperty(i, new Coordinates<int>(x, y, macroSizes[i]));
         }
         setVertexProperty(numNodes, new Coordinates<int>(-1, -1, 0));
         setVertexProperty(numNodes + 1, new Coordinates<int>(numNodes, numNodes, 0));
@@ -165,6 +166,7 @@ public:
         int temp = getVertexProperty(seqX[pos1]).getValue()->getX();
         getVertexProperty(seqX[pos1]).getValue()->setX(getVertexProperty(seqX[pos2]).getValue()->getX());
         getVertexProperty(seqX[pos2]).getValue()->setX(temp);
+
         maintainEdges(seqX[pos1], seqX[pos2]);
 
         swap(seqX[pos1], seqX[pos2]);
@@ -175,14 +177,41 @@ public:
         int temp = getVertexProperty(seqY[pos1]).getValue()->getY();
         getVertexProperty(seqY[pos1]).getValue()->setY(getVertexProperty(seqY[pos2]).getValue()->getY());
         getVertexProperty(seqY[pos2]).getValue()->setY(temp);
+
         maintainEdges(seqY[pos1], seqY[pos2]);
 
         swap(seqY[pos1], seqY[pos2]);
     }
 
-    void swapBoth(int v1, int v2)
+    void swapBoth(int pos1, int pos2)
     {
-        cerr << "Not implemented" << endl;
+        int v1 = seqX[pos1];
+        int v2 = seqX[pos2];
+
+        int temp = getVertexProperty(v1).getValue()->getX();
+        getVertexProperty(v1).getValue()->setX(getVertexProperty(v2).getValue()->getX());
+        getVertexProperty(v2).getValue()->setX(temp);
+
+        temp = getVertexProperty(v1).getValue()->getY();
+        getVertexProperty(v1).getValue()->setY(getVertexProperty(v2).getValue()->getY());
+        getVertexProperty(v2).getValue()->setY(temp);
+
+        maintainEdges(v1, v2);
+
+        swap(seqX[pos1], seqX[pos2]);
+        int left, right;
+        for (int i = 0; i < seqY.size(); i++)
+        {
+            if (seqY[i] == v1)
+            {
+                left = i;
+            }
+            if (seqY[i] == v2)
+            {
+                right = i;
+            }
+        }
+        swap(seqY[left], seqY[right]);
     }
 
     vector<int> getSeqX() const
@@ -193,6 +222,25 @@ public:
     vector<int> getSeqY() const
     {
         return seqY;
+    }
+
+    void maintainEdges(int v)
+    {
+        clearEdges(v);
+
+        // only check for edges from others to v, and from v to others
+        for (int i = 0; i < numNodes; i++)
+        {
+            if (i != v)
+            {
+                checkAndAddEdge(i, v);
+                checkAndAddEdge(v, i);
+            }
+        }
+        // Add edges from source to v
+        addDirectedEdge(numNodes, v, 0);
+        // Add edges from v1 and v2 to sink
+        addDirectedEdge(v, numNodes + 1, getVertexProperty(v).getValue()->getValue());
     }
 };
 
