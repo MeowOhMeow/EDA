@@ -11,11 +11,11 @@ class Coordinates
 private:
     int x;
     int y;
-    T *value;
+    T value;
 
 public:
     Coordinates() {}
-    Coordinates(int x, int y, T *value) : x(x), y(y), value(value) {}
+    Coordinates(int x, int y, T value) : x(x), y(y), value(value) {}
 
     int getX() const
     {
@@ -27,7 +27,7 @@ public:
         return y;
     }
 
-    T *getValue() const
+    T getValue() const
     {
         return value;
     }
@@ -42,7 +42,7 @@ public:
         this->y = y;
     }
 
-    void setValue(T *value)
+    void setValue(T value)
     {
         this->value = value;
     }

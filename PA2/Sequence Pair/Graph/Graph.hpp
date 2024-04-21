@@ -212,7 +212,18 @@ public:
 
     void clearEdges(int vertex)
     {
+        // Clear outgoing edges and update incoming edges
+        for (const auto &edge : outEdgesList[vertex])
+        {
+            inEdgesList[edge.first].erase(vertex);
+        }
         outEdgesList[vertex].clear();
+
+        // Clear incoming edges and update outgoing edges
+        for (const auto &edge : inEdgesList[vertex])
+        {
+            outEdgesList[edge.first].erase(vertex);
+        }
         inEdgesList[vertex].clear();
     }
 
@@ -225,6 +236,20 @@ public:
     int size() const
     {
         return outEdgesList.size();
+    }
+
+    // Method to print the graph
+    void print() const
+    {
+        for (int i = 0; i < outEdgesList.size(); i++)
+        {
+            cout << i << " -> ";
+            for (const auto &edge : outEdgesList[i])
+            {
+                cout << edge.first << "(" << edge.second << ") ";
+            }
+            cout << endl;
+        }
     }
 };
 
