@@ -183,35 +183,82 @@ public:
         swap(seqY[pos1], seqY[pos2]);
     }
 
+    /*
+     * Swap the positions of two vertices in both seqX and seqY using their positions
+     */
     void swapBoth(int pos1, int pos2)
     {
-        int v1 = seqX[pos1];
-        int v2 = seqX[pos2];
+        int temp = getVertexProperty(seqX[pos1]).getValue()->getX();
+        getVertexProperty(seqX[pos1]).getValue()->setX(getVertexProperty(seqX[pos2]).getValue()->getX());
+        getVertexProperty(seqX[pos2]).getValue()->setX(temp);
 
-        int temp = getVertexProperty(v1).getValue()->getX();
-        getVertexProperty(v1).getValue()->setX(getVertexProperty(v2).getValue()->getX());
-        getVertexProperty(v2).getValue()->setX(temp);
-
-        temp = getVertexProperty(v1).getValue()->getY();
-        getVertexProperty(v1).getValue()->setY(getVertexProperty(v2).getValue()->getY());
-        getVertexProperty(v2).getValue()->setY(temp);
-
-        maintainEdges(v1, v2);
-
-        swap(seqX[pos1], seqX[pos2]);
-        int left, right;
-        for (size_t i = 0; i < seqY.size(); i++)
+        pair<Vertex, Vertex> vertices = getVerticesX(pos1, pos2);
+        int pos3, pos4;
+        for (int i = 0; i < numNodes; i++)
         {
-            if (seqY[i] == v1)
+            if (seqY[i] == vertices.first.getId())
             {
-                left = i;
+                pos3 = i;
             }
-            if (seqY[i] == v2)
+            if (seqY[i] == vertices.second.getId())
             {
-                right = i;
+                pos4 = i;
             }
         }
-        swap(seqY[left], seqY[right]);
+        temp = getVertexProperty(seqY[pos3]).getValue()->getY();
+        getVertexProperty(seqY[pos3]).getValue()->setY(getVertexProperty(seqY[pos4]).getValue()->getY());
+        getVertexProperty(seqY[pos4]).getValue()->setY(temp);
+
+        maintainEdges(seqX[pos1], seqX[pos2]);
+
+        swap(seqX[pos1], seqX[pos2]);
+        swap(seqY[pos3], seqY[pos4]);
+    }
+
+    /*
+     * Overloaded function to swap the positions of two vertices in both seqX and seqY using the vertices.
+     * Because different Graphs' vertices sequence may not be the same.
+     */
+    void swapBoth(Vertex &v1, Vertex &v2)
+    {
+        int pos1, pos2, pos3, pos4;
+        for (int i = 0; i < numNodes; i++)
+        {
+            if (seqX[i] == v1.getId())
+            {
+                pos1 = i;
+            }
+            if (seqX[i] == v2.getId())
+            {
+                pos2 = i;
+            }
+            if (seqY[i] == v1.getId())
+            {
+                pos3 = i;
+            }
+            if (seqY[i] == v2.getId())
+            {
+                pos4 = i;
+            }
+        }
+
+        int temp = getVertexProperty(seqX[pos1]).getValue()->getX();
+        getVertexProperty(seqX[pos1]).getValue()->setX(getVertexProperty(seqX[pos2]).getValue()->getX());
+        getVertexProperty(seqX[pos2]).getValue()->setX(temp);
+
+        temp = getVertexProperty(seqY[pos3]).getValue()->getY();
+        getVertexProperty(seqY[pos3]).getValue()->setY(getVertexProperty(seqY[pos4]).getValue()->getY());
+        getVertexProperty(seqY[pos4]).getValue()->setY(temp);
+
+        maintainEdges(seqX[pos1], seqX[pos2]);
+
+        swap(seqX[pos1], seqX[pos2]);
+        swap(seqY[pos3], seqY[pos4]);
+    }
+
+    pair<Vertex, Vertex> getVerticesX(int pos1, int pos2)
+    {
+        return {Vertex(seqX[pos1]), Vertex(seqX[pos2])};
     }
 
     vector<int> getSeqX() const

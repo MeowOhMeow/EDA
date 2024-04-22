@@ -69,15 +69,7 @@ private:
         previousIndices = {i, j};
     }
 
-    void move3(int i, int j)
-    {
-        // horizontalGraph->swapBoth(i, j);
-        // verticalGraph->swapBoth(i, j);
-        // previousMove = M3;
-        // previousIndices = {i, j};
-    }
-
-    void move4(int v)
+    void move3(int v)
     {
         int width = horizontalGraph->getVertexProperty(v).getValue()->getValue();
         int height = verticalGraph->getVertexProperty(v).getValue()->getValue();
@@ -85,8 +77,17 @@ private:
         verticalGraph->getVertexProperty(v).getValue()->setValue(width);
         horizontalGraph->maintainEdges(v);
         verticalGraph->maintainEdges(v);
-        previousMove = M4;
+        previousMove = M3;
         previousIndices = {v, -1};
+    }
+
+    void move4(int i, int j)
+    {
+        pair<Vertex, Vertex> vertices = horizontalGraph->getVerticesX(i, j);
+        horizontalGraph->swapBoth(i, j);
+        verticalGraph->swapBoth(vertices.first, vertices.second);
+        previousMove = M4;
+        previousIndices = {i, j};
     }
 
 public:
@@ -156,10 +157,10 @@ public:
             move2(i, j);
             break;
         case M3:
-            move3(i, j);
+            move3(i);
             break;
         case M4:
-            move4(i);
+            move4(i, j);
             break;
 
         default:
@@ -200,10 +201,10 @@ public:
             move2(previousIndices.first, previousIndices.second);
             break;
         case M3:
-            move3(previousIndices.first, previousIndices.second);
+            move3(previousIndices.first);
             break;
         case M4:
-            move4(previousIndices.first);
+            move4(previousIndices.first, previousIndices.second);
             break;
 
         default:
