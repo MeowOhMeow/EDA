@@ -17,7 +17,7 @@ protected:
         Node *left;
         Node *right;
 
-        Node(VertexData data = T(), Node *left = nullptr, Node *right = nullptr) : data(data), left(left), right(right) {}
+        Node(VertexData data = VertexData(), Node *left = nullptr, Node *right = nullptr) : data(data), left(left), right(right) {}
     };
 
     Node *root;
