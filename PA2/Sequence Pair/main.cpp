@@ -75,7 +75,13 @@ int main(int argc, char *argv[])
 
     Scheduler scheduler(macros);
 
-    SimulatedAnnealing sa(1e5, 0.85, 0.01, 7, filename);
+    double avgSize = 0;
+    for (auto &macro : macros)
+    {
+        avgSize += max(macro.getWidth(), macro.getHeight());
+    }
+    avgSize /= macros.size();
+    SimulatedAnnealing sa(avgSize * macros.size(), 0.95, 1, 7, filename);
     sa.run(scheduler);
 
     in_time_t = chrono::system_clock::to_time_t(chrono::system_clock::now());
