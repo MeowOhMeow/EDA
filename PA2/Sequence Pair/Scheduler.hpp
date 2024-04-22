@@ -7,9 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
-#include <algorithm>
 #include <chrono>
-#include <iomanip>
 #include <random>
 
 #include "Macro.hpp"
@@ -53,7 +51,7 @@ private:
     vector<Macro> macros;
 
     // move 1: swapX
-    void move1(int i, int j)
+    inline void move1(int i, int j)
     {
         horizontalGraph->swapX(i, j);
         verticalGraph->swapY(numNodes - i - 1, numNodes - j - 1);
@@ -61,7 +59,7 @@ private:
         previousIndices = {i, j};
     }
 
-    void move2(int i, int j)
+    inline void move2(int i, int j)
     {
         horizontalGraph->swapY(i, j);
         verticalGraph->swapX(i, j);
@@ -69,7 +67,7 @@ private:
         previousIndices = {i, j};
     }
 
-    void move3(int v)
+    inline void move3(int v)
     {
         int width = horizontalGraph->getVertexProperty(v).getValue()->getValue();
         int height = verticalGraph->getVertexProperty(v).getValue()->getValue();
@@ -81,7 +79,7 @@ private:
         previousIndices = {v, -1};
     }
 
-    void move4(int i, int j)
+    inline void move4(int i, int j)
     {
         pair<Vertex, Vertex> vertices = horizontalGraph->getVerticesX(i, j);
         horizontalGraph->swapBoth(i, j);
@@ -91,10 +89,10 @@ private:
     }
 
 public:
-    Scheduler(vector<Macro> &macros, int k = 7) : k(k), macros(macros)
+    Scheduler(vector<Macro> &macros, int k = 7, int timeLimit = 10) : k(k), macros(macros)
     {
         start = chrono::high_resolution_clock::now();
-        end = start + chrono::minutes(10);
+        end = start + chrono::minutes(timeLimit);
 
         numNodes = macros.size();
 
@@ -113,7 +111,7 @@ public:
     {
         delete horizontalGraph;
         delete verticalGraph;
-    };
+    }
 
     inline void initialize()
     {

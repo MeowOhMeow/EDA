@@ -2,15 +2,11 @@
 #define SIMULATEDANNEALING_HPP
 
 #include <iostream>
-#include <unordered_map>
 #include <fstream>
 #include <iomanip>
-#include <limits>
-#include <cmath>
 #include <chrono>
 #include <string>
 #include <vector>
-#include <sstream>
 
 #include "Scheduler.hpp"
 
@@ -30,7 +26,7 @@ public:
         double coolingRate = 0.95,
         double absoluteTemperature = 0.01,
         int iterations = 7,
-        string filename = "log.txt") 
+        string filename = "log.txt")
     {
         this->temperature = temperature;
         this->coolingRate = coolingRate;

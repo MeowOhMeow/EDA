@@ -16,12 +16,6 @@ public:
     {
         return value;
     }
-
-    // Overloading the operator!=
-    bool notEquals(const EdgeProperty<EdgeData> &other) const
-    {
-        return value != other.value;
-    }
 };
 
 #endif // EDGEPROPERTY_HPP

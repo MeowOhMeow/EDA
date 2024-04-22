@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <vector>
-#include <map>
 #include <string>
+#include <map>
 #include <unordered_map>
 #include <set>
 #include <limits>
@@ -139,10 +139,7 @@ public:
     // Method to set edge property
     void setEdgeProperty(int source, int target, const EdgeProperty<EdgeData> &property)
     {
-        if (property.notEquals(emptyEdgeProperty))
-        {
-            edgePropertiesMap[source][target] = property;
-        }
+        edgePropertiesMap[source][target] = property;
     }
 
     void setEdgeProperty(const Vertex &source, const Vertex &target, const EdgeProperty<EdgeData> &property)

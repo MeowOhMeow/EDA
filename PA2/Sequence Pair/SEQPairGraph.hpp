@@ -3,11 +3,8 @@
 
 #include <iostream>
 #include <vector>
-#include <map>
 #include <string>
 #include <unordered_map>
-#include <set>
-#include <limits>
 #include <numeric>
 #include <algorithm>
 
@@ -25,21 +22,6 @@ private:
     vector<int> macroSizes;
 
     int numNodes;
-
-    struct KeyValuePair
-    {
-        int key;
-        int x;
-        int y;
-        int *value;
-
-        KeyValuePair(int x, int y, int *value) : key(x + y), x(x), y(y), value(value) {}
-
-        static bool compare(const KeyValuePair &a, const KeyValuePair &b)
-        {
-            return a.key < b.key;
-        }
-    };
 
     vector<pair<int, int>> getCoordinates()
     {
@@ -95,7 +77,7 @@ private:
         }
     }
 
-    void maintainEdges(int v1, int v2)
+    inline void maintainEdges(int v1, int v2)
     {
         clearEdges(v1);
         clearEdges(v2);
@@ -124,7 +106,6 @@ private:
 
 public:
     SequencePairGraph() : Graph<Coordinates<int> *, NoProperty>(0) {}
-    // Constructor
     SequencePairGraph(vector<int> &macroSizes, bool isVertical = false)
         : Graph<Coordinates<int> *, NoProperty>(macroSizes.size() + 2), macroSizes(macroSizes)
     {
@@ -259,16 +240,6 @@ public:
     pair<Vertex, Vertex> getVerticesX(int pos1, int pos2)
     {
         return {Vertex(seqX[pos1]), Vertex(seqX[pos2])};
-    }
-
-    vector<int> getSeqX() const
-    {
-        return seqX;
-    }
-
-    vector<int> getSeqY() const
-    {
-        return seqY;
     }
 
     void maintainEdges(int v)
