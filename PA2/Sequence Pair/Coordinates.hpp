@@ -1,17 +1,17 @@
 #ifndef COORDINATES_HPP
 #define COORDINATES_HPP
 
-template <class T>
+template <class Data>
 class Coordinates
 {
 private:
     int x;
     int y;
-    T value;
+    Data value;
 
 public:
     Coordinates() {}
-    Coordinates(int x, int y, T value) : x(x), y(y), value(value) {}
+    Coordinates(int x, int y, Data value) : x(x), y(y), value(value) {}
 
     int getX() const
     {
@@ -23,7 +23,7 @@ public:
         return y;
     }
 
-    T getValue() const
+    Data getValue() const
     {
         return value;
     }
@@ -38,7 +38,7 @@ public:
         this->y = y;
     }
 
-    void setValue(T value)
+    void setValue(Data value)
     {
         this->value = value;
     }
