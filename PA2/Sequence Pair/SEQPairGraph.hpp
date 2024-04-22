@@ -19,7 +19,6 @@ class SequencePairGraph : public Graph<Coordinates<int> *, NoProperty>
 {
 private:
     vector<int> seqX, seqY;
-    vector<int> macroSizes;
 
     int numNodes;
 
@@ -107,7 +106,7 @@ private:
 public:
     SequencePairGraph() : Graph<Coordinates<int> *, NoProperty>(0) {}
     SequencePairGraph(vector<int> &macroSizes, bool isVertical = false)
-        : Graph<Coordinates<int> *, NoProperty>(macroSizes.size() + 2), macroSizes(macroSizes)
+        : Graph<Coordinates<int> *, NoProperty>(macroSizes.size() + 2)
     {
         numNodes = static_cast<int>(macroSizes.size());
 
