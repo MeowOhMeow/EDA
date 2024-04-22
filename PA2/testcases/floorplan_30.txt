@@ -1,0 +1,33 @@
+NumBlocks 30
+MinAspectRatio 0.5
+MaxAspectRatio 2
+block_0 625 320
+block_1 500 600
+block_2 500 600
+block_3 500 600
+block_4 500 800
+block_5 800 500
+block_6 800 500
+block_7 500 800
+block_8 640 625
+block_9 500 1000
+block_10 500 1000
+block_11 625 800
+block_12 500 1000
+block_13 625 800
+block_14 500 1000
+block_15 800 750
+block_16 960 625
+block_17 800 750
+block_18 960 625
+block_19 800 750
+block_20 960 625
+block_21 875 800
+block_22 800 875
+block_23 875 800
+block_24 1120 625
+block_25 1120 625
+block_26 800 1000
+block_27 800 1000
+block_28 800 1000
+block_29 800 1125

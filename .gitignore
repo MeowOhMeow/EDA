@@ -3,6 +3,7 @@
 **/*.exe
 **/*.png
 **/*.gp
-**/test*
+**/test.*
+**/output.*
 **/*.o
 **/*.log
