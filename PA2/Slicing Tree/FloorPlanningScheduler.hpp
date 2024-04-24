@@ -114,7 +114,7 @@ private:
                 if (expressions[nodeIndex] != expressions[nodeIndex + 2])
                     break;
             }
-            else if ((expressions[nodeIndex] != HORIZONTAL && expressions[nodeIndex] != VERTICAL) && (expressions[nodeIndex + 1] == HORIZONTAL || expressions[nodeIndex + 1] == VERTICAL))
+            if ((expressions[nodeIndex] != HORIZONTAL && expressions[nodeIndex] != VERTICAL) && (expressions[nodeIndex + 1] == HORIZONTAL || expressions[nodeIndex + 1] == VERTICAL))
             {
                 if (2 * operatorCount < nodeIndex && expressions[nodeIndex - 1] != expressions[nodeIndex + 1])
                     break;
