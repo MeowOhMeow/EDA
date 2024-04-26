@@ -99,7 +99,7 @@ public:
                 steps++;
             }
             currentIteration++;
-            int completeSteps = 100 * currentIteration / totalIterations;
+            int completeSteps = min(100 * currentIteration / totalIterations, 100);
             int ETA = max(max(totalIterations - currentIteration, 0) * stepPerIteration, 0) * (scheduler.getElapsed() / float(steps + 1));
             cout << "Progress: " << completeSteps << "% [" << string(completeSteps / 2, '=') << string(50 - completeSteps / 2, ' ') << "] ETA: " << ETA << "s   " << "\r" << flush;
 
