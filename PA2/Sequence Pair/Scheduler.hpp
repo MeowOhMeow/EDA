@@ -51,20 +51,20 @@ private:
     vector<Macro> macros;
 
     // move 1: swapX
-    inline void move1(int i, int j)
+    inline void move1(int v1, int v2)
     {
-        horizontalGraph->swapX(i, j);
-        verticalGraph->swapY(numNodes - i - 1, numNodes - j - 1);
+        horizontalGraph->swapX(v1, v2);
+        verticalGraph->swapY(v1, v2);
         previousMove = M1;
-        previousIndices = {i, j};
+        previousIndices = {v1, v2};
     }
 
-    inline void move2(int i, int j)
+    inline void move2(int v1, int v2)
     {
-        horizontalGraph->swapY(i, j);
-        verticalGraph->swapX(i, j);
+        horizontalGraph->swapY(v1, v2);
+        verticalGraph->swapX(v1, v2);
         previousMove = M2;
-        previousIndices = {i, j};
+        previousIndices = {v1, v2};
     }
 
     inline void move3(int v)
@@ -79,13 +79,12 @@ private:
         previousIndices = {v, -1};
     }
 
-    inline void move4(int i, int j)
+    inline void move4(int v1, int v2)
     {
-        pair<Vertex, Vertex> vertices = horizontalGraph->getVerticesX(i, j);
-        horizontalGraph->swapBoth(i, j);
-        verticalGraph->swapBoth(vertices.first, vertices.second);
+        horizontalGraph->swapBoth(v1, v2);
+        verticalGraph->swapBoth(v1, v2);
         previousMove = M4;
-        previousIndices = {i, j};
+        previousIndices = {v1, v2};
     }
 
 public:
@@ -139,26 +138,26 @@ public:
         {
             run = false;
         }
-        int i = getRandomNumber(0, numNodes - 1);
-        int j = getRandomNumber(0, numNodes - 1);
-        while (i == j)
+        int v1 = getRandomNumber(0, numNodes - 1);
+        int v2 = getRandomNumber(0, numNodes - 1);
+        while (v1 == v2)
         {
-            j = getRandomNumber(0, numNodes - 1);
+            v2 = getRandomNumber(0, numNodes - 1);
         }
         // make a random modification to the current tree (state)
         switch (getRandomNumber(0, NUM_MOVES - 1))
         {
         case M1:
-            move1(i, j);
+            move1(v1, v2);
             break;
         case M2:
-            move2(i, j);
+            move2(v1, v2);
             break;
         case M3:
-            move3(i);
+            move3(v1);
             break;
         case M4:
-            move4(i, j);
+            move4(v1, v2);
             break;
 
         default:

@@ -18,31 +18,7 @@ using namespace std;
 class SequencePairGraph : public Graph<Coordinates<int> *, NoProperty>
 {
 private:
-    vector<int> seqX, seqY;
-
     int numNodes;
-
-    vector<pair<int, int>> getCoordinates()
-    {
-        vector<pair<int, int>> coordinates;
-        unordered_map<int, int> seq2_map;
-        // Create a mapping of elements in seq2 to their indices
-        for (size_t i = 0; i < seqY.size(); i++)
-        {
-            seq2_map[seqY[i]] = i;
-        }
-
-        // Generate coordinates based on seq1 and seq2_map
-        for (size_t i = 0; i < seqX.size(); i++)
-        {
-            if (seq2_map.find(seqX[i]) != seq2_map.end())
-            {
-                coordinates.push_back({i, seq2_map[seqX[i]]});
-            }
-        }
-
-        return coordinates;
-    }
 
     inline void checkAndAddEdge(int v1, int v2)
     {
@@ -110,22 +86,19 @@ public:
     {
         numNodes = static_cast<int>(macroSizes.size());
 
-        seqX.resize(numNodes);
-        seqY.resize(numNodes);
-        iota(seqX.begin(), seqX.end(), 0);
-        iota(seqY.begin(), seqY.end(), 0);
         if (isVertical)
         {
-            reverse(seqY.begin(), seqY.end());
+            for (int i = 0; i < numNodes; i++)
+            {
+                setVertexProperty(i, new Coordinates<int>(i, numNodes - 1 - i, macroSizes[i]));
+            }
         }
-
-        vector<pair<int, int>> coordinates = getCoordinates();
-        for (size_t i = 0; i < coordinates.size(); i++)
+        else
         {
-            int x = coordinates[i].first;
-            int y = coordinates[i].second;
-
-            setVertexProperty(i, new Coordinates<int>(x, y, macroSizes[i]));
+            for (int i = 0; i < numNodes; i++)
+            {
+                setVertexProperty(i, new Coordinates<int>(i, i, macroSizes[i]));
+            }
         }
         setVertexProperty(numNodes, new Coordinates<int>(-1, -1, 0));
         setVertexProperty(numNodes + 1, new Coordinates<int>(numNodes, numNodes, 0));
@@ -141,104 +114,38 @@ public:
         }
     }
 
-    void swapX(int pos1, int pos2)
+    void swapX(int v1, int v2)
     {
-        int temp = getVertexProperty(seqX[pos1]).getValue()->getX();
-        getVertexProperty(seqX[pos1]).getValue()->setX(getVertexProperty(seqX[pos2]).getValue()->getX());
-        getVertexProperty(seqX[pos2]).getValue()->setX(temp);
+        int temp = getVertexProperty(v1).getValue()->getX();
+        getVertexProperty(v1).getValue()->setX(getVertexProperty(v2).getValue()->getX());
+        getVertexProperty(v2).getValue()->setX(temp);
 
-        maintainEdges(seqX[pos1], seqX[pos2]);
-
-        swap(seqX[pos1], seqX[pos2]);
+        maintainEdges(v1, v2);
     }
 
-    void swapY(int pos1, int pos2)
+    void swapY(int v1, int v2)
     {
-        int temp = getVertexProperty(seqY[pos1]).getValue()->getY();
-        getVertexProperty(seqY[pos1]).getValue()->setY(getVertexProperty(seqY[pos2]).getValue()->getY());
-        getVertexProperty(seqY[pos2]).getValue()->setY(temp);
+        int temp = getVertexProperty(v1).getValue()->getY();
+        getVertexProperty(v1).getValue()->setY(getVertexProperty(v2).getValue()->getY());
+        getVertexProperty(v2).getValue()->setY(temp);
 
-        maintainEdges(seqY[pos1], seqY[pos2]);
-
-        swap(seqY[pos1], seqY[pos2]);
+        maintainEdges(v1, v2);
     }
 
     /*
      * Swap the positions of two vertices in both seqX and seqY using their positions
      */
-    void swapBoth(int pos1, int pos2)
+    void swapBoth(int v1, int v2)
     {
-        int temp = getVertexProperty(seqX[pos1]).getValue()->getX();
-        getVertexProperty(seqX[pos1]).getValue()->setX(getVertexProperty(seqX[pos2]).getValue()->getX());
-        getVertexProperty(seqX[pos2]).getValue()->setX(temp);
+        int temp = getVertexProperty(v1).getValue()->getX();
+        getVertexProperty(v1).getValue()->setX(getVertexProperty(v2).getValue()->getX());
+        getVertexProperty(v2).getValue()->setX(temp);
 
-        pair<Vertex, Vertex> vertices = getVerticesX(pos1, pos2);
-        int pos3, pos4;
-        for (int i = 0; i < numNodes; i++)
-        {
-            if (seqY[i] == vertices.first.getId())
-            {
-                pos3 = i;
-            }
-            if (seqY[i] == vertices.second.getId())
-            {
-                pos4 = i;
-            }
-        }
-        temp = getVertexProperty(seqY[pos3]).getValue()->getY();
-        getVertexProperty(seqY[pos3]).getValue()->setY(getVertexProperty(seqY[pos4]).getValue()->getY());
-        getVertexProperty(seqY[pos4]).getValue()->setY(temp);
+        temp = getVertexProperty(v1).getValue()->getY();
+        getVertexProperty(v1).getValue()->setY(getVertexProperty(v2).getValue()->getY());
+        getVertexProperty(v2).getValue()->setY(temp);
 
-        maintainEdges(seqX[pos1], seqX[pos2]);
-
-        swap(seqX[pos1], seqX[pos2]);
-        swap(seqY[pos3], seqY[pos4]);
-    }
-
-    /*
-     * Overloaded function to swap the positions of two vertices in both seqX and seqY using the vertices.
-     * Because different Graphs' vertices sequence may not be the same.
-     */
-    void swapBoth(Vertex &v1, Vertex &v2)
-    {
-        int pos1, pos2, pos3, pos4;
-        for (int i = 0; i < numNodes; i++)
-        {
-            if (seqX[i] == v1.getId())
-            {
-                pos1 = i;
-            }
-            if (seqX[i] == v2.getId())
-            {
-                pos2 = i;
-            }
-            if (seqY[i] == v1.getId())
-            {
-                pos3 = i;
-            }
-            if (seqY[i] == v2.getId())
-            {
-                pos4 = i;
-            }
-        }
-
-        int temp = getVertexProperty(seqX[pos1]).getValue()->getX();
-        getVertexProperty(seqX[pos1]).getValue()->setX(getVertexProperty(seqX[pos2]).getValue()->getX());
-        getVertexProperty(seqX[pos2]).getValue()->setX(temp);
-
-        temp = getVertexProperty(seqY[pos3]).getValue()->getY();
-        getVertexProperty(seqY[pos3]).getValue()->setY(getVertexProperty(seqY[pos4]).getValue()->getY());
-        getVertexProperty(seqY[pos4]).getValue()->setY(temp);
-
-        maintainEdges(seqX[pos1], seqX[pos2]);
-
-        swap(seqX[pos1], seqX[pos2]);
-        swap(seqY[pos3], seqY[pos4]);
-    }
-
-    pair<Vertex, Vertex> getVerticesX(int pos1, int pos2)
-    {
-        return {Vertex(seqX[pos1]), Vertex(seqX[pos2])};
+        maintainEdges(v1, v2);
     }
 
     void maintainEdges(int v)
