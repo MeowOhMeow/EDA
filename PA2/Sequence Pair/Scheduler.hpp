@@ -73,8 +73,8 @@ private:
         int height = verticalGraph->getVertexProperty(v).getValue()->getValue();
         horizontalGraph->getVertexProperty(v).getValue()->setValue(height);
         verticalGraph->getVertexProperty(v).getValue()->setValue(width);
-        horizontalGraph->maintainEdges(v);
-        verticalGraph->maintainEdges(v);
+        horizontalGraph->updateValue(v);
+        verticalGraph->updateValue(v);
         previousMove = M3;
         previousIndices = {v, -1};
     }

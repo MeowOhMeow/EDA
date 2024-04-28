@@ -148,23 +148,14 @@ public:
         maintainEdges(v1, v2);
     }
 
-    void maintainEdges(int v)
+    void updateValue(int v1)
     {
-        clearEdges(v);
+        int value = getVertexProperty(v1).getValue()->getValue();
 
-        // only check for edges from others to v, and from v to others
-        for (int i = 0; i < numNodes; i++)
+        for (int v2 : getNeighbors(v1))
         {
-            if (i != v)
-            {
-                checkAndAddEdge(i, v);
-                checkAndAddEdge(v, i);
-            }
+            setEdgeWeight(v1, v2, value);
         }
-        // Add edges from source to v
-        addDirectedEdge(numNodes, v, 0);
-        // Add edges from v1 and v2 to sink
-        addDirectedEdge(v, numNodes + 1, getVertexProperty(v).getValue()->getValue());
     }
 };
 
