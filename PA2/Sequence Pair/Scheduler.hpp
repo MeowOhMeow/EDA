@@ -47,6 +47,7 @@ private:
 
     Moves previousMove;
     pair<int, int> previousIndices;
+    vector<int> previousLongestPathH, previousLongestPathV;
 
     vector<Macro> macros;
 
@@ -138,11 +139,11 @@ public:
         {
             run = false;
         }
-        int v1 = getRandomNumber(0, numNodes - 1);
-        int v2 = getRandomNumber(0, numNodes - 1);
-        while (v1 == v2)
+        int v1 = previousLongestPathH[getRandomNumber(1, previousLongestPathH.size() - 2)];
+        int v2 = previousLongestPathV[getRandomNumber(1, previousLongestPathV.size() - 2)];
+        if (v1 == v2)
         {
-            v2 = getRandomNumber(0, numNodes - 1);
+            v2 = (v1 + 1) % numNodes;
         }
         // make a random modification to the current tree (state)
         switch (getRandomNumber(0, NUM_MOVES - 1))
@@ -168,8 +169,14 @@ public:
 
     inline double evaluateState()
     {
-        vector<float> costsH = LongestPath<Coordinates<int> *, NoProperty>::find(*horizontalGraph);
-        vector<float> costsV = LongestPath<Coordinates<int> *, NoProperty>::find(*verticalGraph);
+        pair<vector<float>, vector<int>> longestPathH = LongestPath<Coordinates<int> *, NoProperty>::findLongestPath(*horizontalGraph);
+        pair<vector<float>, vector<int>> longestPathV = LongestPath<Coordinates<int> *, NoProperty>::findLongestPath(*verticalGraph);
+
+        vector<float> costsH = longestPathH.first;
+        vector<float> costsV = longestPathV.first;
+
+        previousLongestPathH = longestPathH.second;
+        previousLongestPathV = longestPathV.second;
 
         return max(costsH.back(), costsV.back());
     }
