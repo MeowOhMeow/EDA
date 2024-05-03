@@ -23,7 +23,7 @@ vector<string> split(string &str, char delim)
     return res;
 }
 
-vector<Macro> getMacros(string filename)
+vector<Macro> getMacros(string filename, float &minAspectRatio, float &maxAspectRatio)
 {
     vector<Macro> macros;
     ifstream file(filename);
@@ -33,7 +33,11 @@ vector<Macro> getMacros(string filename)
     vector<string> tokens = split(line, ' ');
     nums = stoi(tokens[1]);
     getline(file, line);
+    tokens = split(line, ' ');
+    minAspectRatio = stof(tokens[1]);
     getline(file, line);
+    tokens = split(line, ' ');
+    maxAspectRatio = stof(tokens[1]);
     for (int i = 0; i < nums; i++)
     {
         getline(file, line);
@@ -69,9 +73,10 @@ int main(int argc, char *argv[])
     logFile << "Output file: " << argv[2] << endl;
     logFile.close();
 
-    vector<Macro> macros = getMacros(argv[1]);
+    float minAspectRatio, maxAspectRatio;
+    vector<Macro> macros = getMacros(argv[1], minAspectRatio, maxAspectRatio);
 
-    Scheduler scheduler(macros);
+    Scheduler scheduler(macros, minAspectRatio, maxAspectRatio);
 
     double avgSize = 0;
     for (auto &macro : macros)

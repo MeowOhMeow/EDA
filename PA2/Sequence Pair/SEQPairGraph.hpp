@@ -148,7 +148,7 @@ public:
         maintainEdges(v1, v2);
     }
 
-    void updateValue(int v1)
+    void updateEdges(int v1)
     {
         int value = getVertexProperty(v1).getValue()->getValue();
 

@@ -50,6 +50,9 @@ private:
     vector<int> previousLongestPathH, previousLongestPathV;
 
     vector<Macro> macros;
+    float minAspectRatio, maxAspectRatio;
+    vector<vector<pair<int, int>>> macroDimensions;
+    vector<int> macroDimensionsIndex;
 
     // move 1: swapX
     inline void move1(int v1, int v2)
@@ -60,6 +63,7 @@ private:
         previousIndices = {v1, v2};
     }
 
+    // move 2: swapY
     inline void move2(int v1, int v2)
     {
         horizontalGraph->swapY(v1, v2);
@@ -68,18 +72,30 @@ private:
         previousIndices = {v1, v2};
     }
 
-    inline void move3(int v)
+    // move 3: change dimensions
+    inline void move3(int v, int aspectIndex = -1)
     {
-        int width = horizontalGraph->getVertexProperty(v).getValue()->getValue();
-        int height = verticalGraph->getVertexProperty(v).getValue()->getValue();
-        horizontalGraph->getVertexProperty(v).getValue()->setValue(height);
-        verticalGraph->getVertexProperty(v).getValue()->setValue(width);
-        horizontalGraph->updateValue(v);
-        verticalGraph->updateValue(v);
+        int originalIndex = macroDimensionsIndex[v];
+        if (aspectIndex == -1)
+        {
+            aspectIndex = (originalIndex + 1) % macroDimensions[v].size();
+            macroDimensionsIndex[v] = aspectIndex;
+        }
+        else
+        {
+            macroDimensionsIndex[v] = aspectIndex;
+        }
+        int w = macroDimensions[v][aspectIndex].first;
+        int h = macroDimensions[v][aspectIndex].second;
+        horizontalGraph->getVertexProperty(v).getValue()->setValue(w);
+        verticalGraph->getVertexProperty(v).getValue()->setValue(h);
+        horizontalGraph->updateEdges(v);
+        verticalGraph->updateEdges(v);
         previousMove = M3;
-        previousIndices = {v, -1};
+        previousIndices = {v, originalIndex};
     }
 
+    // move 4: swap both
     inline void move4(int v1, int v2)
     {
         horizontalGraph->swapBoth(v1, v2);
@@ -88,19 +104,63 @@ private:
         previousIndices = {v1, v2};
     }
 
+    vector<pair<int, int>> findIntegerDimensions(int area, float minAspectRatio, float maxAspectRatio)
+    {
+        vector<pair<int, int>> combinations;
+
+        // width <= height
+        for (int width = 1; width * width <= area; ++width)
+        {
+            if (area % width == 0)
+            {
+                int height = area / width;
+                int minHeight = static_cast<int>(width * minAspectRatio);
+                int maxHeight = static_cast<int>(width * maxAspectRatio);
+
+                // Check if height is within the valid range
+                if (minHeight <= height && height <= maxHeight)
+                {
+                    combinations.push_back(make_pair(width, height));
+                }
+            }
+        }
+        // width > height, simply swap width and height
+        int size = static_cast<int>(combinations.size());
+        for (int i = 0; i < size; ++i)
+        {
+            if (combinations[i].first != combinations[i].second)
+            {
+                combinations.push_back(make_pair(combinations[i].second, combinations[i].first));
+            }
+        }
+
+        return combinations;
+    }
+
 public:
-    Scheduler(vector<Macro> &macros, int k = 7, int timeLimit = 10) : k(k), macros(macros)
+    Scheduler(vector<Macro> &macros, float minAspectRatio, float maxAspectRatio, int k = 7, int timeLimit = 10) : k(k), macros(macros), minAspectRatio(minAspectRatio), maxAspectRatio(maxAspectRatio)
     {
         start = chrono::high_resolution_clock::now();
         end = start + chrono::minutes(timeLimit);
 
         numNodes = macros.size();
+        macroDimensions.resize(numNodes);
+        macroDimensionsIndex.resize(numNodes, 0);
 
         vector<int> macroWidths, macroHeights;
-        for (Macro &macro : macros)
+        for (int i = 0; i < numNodes; i++)
         {
-            macroWidths.push_back(macro.getWidth());
-            macroHeights.push_back(macro.getHeight());
+            int area = macros[i].getWidth() * macros[i].getHeight();
+            macroDimensions[i] = findIntegerDimensions(area, minAspectRatio, maxAspectRatio);
+            if (macroDimensions[i].empty())
+            {
+                cerr << "No valid dimensions found for macro " << macros[i].getName() << endl;
+                exit(1);
+            }
+            int idx = getRandomNumber(0, macroDimensions[i].size() - 1);
+            macroWidths.push_back(macroDimensions[i][idx].first);
+            macroHeights.push_back(macroDimensions[i][idx].second);
+            macroDimensionsIndex[i] = idx;
         }
 
         horizontalGraph = new SequencePairGraph(macroWidths);
@@ -145,8 +205,13 @@ public:
         {
             v2 = (v1 + 1) % numNodes;
         }
-        // make a random modification to the current tree (state)
-        switch (getRandomNumber(0, NUM_MOVES - 1))
+        // make a random modification to the current graph (state)
+        int move = getRandomNumber(0, NUM_MOVES - 1);
+        while (move == M3 && macroDimensions[v1].size() == 1)
+        {
+            move = getRandomNumber(0, NUM_MOVES - 1);
+        }
+        switch (move)
         {
         case M1:
             move1(v1, v2);
@@ -155,7 +220,7 @@ public:
             move2(v1, v2);
             break;
         case M3:
-            move3(v1);
+            move3(getRandomNumber(0, numNodes - 1));
             break;
         case M4:
             move4(v1, v2);
@@ -205,7 +270,7 @@ public:
             move2(previousIndices.first, previousIndices.second);
             break;
         case M3:
-            move3(previousIndices.first);
+            move3(previousIndices.first, previousIndices.second);
             break;
         case M4:
             move4(previousIndices.first, previousIndices.second);
@@ -221,7 +286,7 @@ public:
     {
         temperature *= coolingRate;
         // check if the current state is improving
-        if (rejectCount / movesCount > 0.95)
+        if (rejectCount / movesCount > 0.99)
         {
             improving = false;
         }
