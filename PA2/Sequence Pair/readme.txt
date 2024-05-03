@@ -2,12 +2,12 @@
 2. 姓名：周柏宇
 3. 使用之程式語言：C++
 4. 測試平台平台：
-    1.  作業系統	
-        - 版本    Windows 11 家用版
-        - 版本	22H2
-        - OS 組建	22621.3527
-        - 體驗	Windows Feature Experience Pack 1000.22700.1003.0
-    2.  編譯器
+    1. 作業系統	
+        - 版本      Windows 11 家用版
+        - 版本      22H2
+        - OS 組建   22621.3527
+        - 體驗	    Windows Feature Experience Pack 1000.22700.1003.0
+    2. 編譯器
         - g++.exe (Rev6, Built by MSYS2 project) 13.2.0
     3. Make
         - GNU Make 4.4.1
