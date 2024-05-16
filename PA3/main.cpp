@@ -109,31 +109,35 @@ int main(int argc, char *argv[])
             // for all points try to avoid the same color as neighbors
             for (const auto &neighbor_idx : neighbors[i])
             {
-                obj += IloAbs(points[i] - points[neighbor_idx]);
+                if (neighbor_idx < i)
+                    obj += (points[i] == points[neighbor_idx]);
             }
         }
-        model.add(IloMaximize(env, obj));
+        model.add(IloMinimize(env, obj));
 
         // Add constraints
         for (size_t i = 0; i < pointsCoordinates.size(); ++i)
         {
-            model.add(points[i] >= 0);
-            model.add(points[i] <= 2);
+            model.add(0 <= points[i] <= 2);
         }
 
         // Solve the problem
         cplex.solve();
 
         // Print solution
+        ofstream output(argv[2]);
         if (cplex.getStatus() == IloAlgorithm::Optimal) {
             cout << "Objective Value: " << cplex.getObjValue() << endl;
+            output << cplex.getObjValue() << endl;
             for (size_t i = 0; i < pointsCoordinates.size(); ++i)
             {
                 cout << "Point " << i << " color: " << cplex.getValue(points[i]) << endl;
+                output << i << " " << cplex.getValue(points[i]) << endl;
             }
         } else {
             cout << "No solution found" << endl;
         }
+        output.close();
     } catch (IloException& ex) {
         cerr << "Error: " << ex << endl;
     }
