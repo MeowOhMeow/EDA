@@ -95,7 +95,8 @@ int main(int argc, char *argv[])
     // }
 
     IloEnv env;
-    try {
+    try
+    {
         IloModel model(env);
         IloCplex cplex(model);
 
@@ -107,44 +108,55 @@ int main(int argc, char *argv[])
         IloExpr obj(env);
         for (size_t i = 0; i < pointsCoordinates.size(); ++i)
         {
+            // constraint: there is only 3 colors can be chosen
+            model.add(colorBit0[i] + colorBit1[i] <= 1);
+            // constraint: colorBits are binary
+            model.add(colorBit0[i] == 0 || colorBit1[i] == 0 || colorBit0[i] == 1 || colorBit1[i] == 1);
+
             // for all points try to avoid the same color as neighbors
             for (const auto &neighbor_idx : neighbors[i])
             {
                 if (neighbor_idx < i)
                 {
+                    // constraint: if two points are neighbors, they cannot have the same color
+                    model.add(colorBit0[i] + colorBit0[neighbor_idx] <= 1 + (colorBit0[i] == colorBit0[neighbor_idx]));
+                    model.add(colorBit1[i] + colorBit1[neighbor_idx] <= 1 + (colorBit1[i] == colorBit1[neighbor_idx]));
+                    model.add((1 - colorBit0[i]) + (1 - colorBit0[neighbor_idx]) <= 1 + (colorBit0[i] == colorBit0[neighbor_idx]));
+                    model.add((1 - colorBit1[i]) + (1 - colorBit1[neighbor_idx]) <= 1 + (colorBit1[i] == colorBit1[neighbor_idx]));
+
                     obj += (colorBit0[i] == colorBit0[neighbor_idx]) && (colorBit1[i] == colorBit1[neighbor_idx]);
                 }
-            }   
+            }
         }
         model.add(IloMinimize(env, obj));
-
-        // Add constraints
-        for (size_t i = 0; i < pointsCoordinates.size(); ++i)
-        {
-            model.add(colorBit0[i] + colorBit1[i] <= 1);
-        }
 
         // Solve the problem
         cplex.solve();
 
         // Print solution
         ofstream output(argv[2]);
-        if (cplex.getStatus() == IloAlgorithm::Optimal) {
+        if (cplex.getStatus() == IloAlgorithm::Optimal)
+        {
             cout << "Objective Value: " << cplex.getObjValue() << endl;
             output << cplex.getObjValue() << endl;
             for (size_t i = 0; i < pointsCoordinates.size(); ++i)
             {
                 bool colorBit0Value = cplex.getValue(colorBit0[i]);
                 bool colorBit1Value = cplex.getValue(colorBit1[i]);
-                int color = colorBit0Value ? 0 : colorBit1Value ? 1 : 2;
+                int color = colorBit0Value ? 0 : colorBit1Value ? 1
+                                                                : 2;
                 cout << "Point " << i << " color: " << color << endl;
                 output << i << " " << color << endl;
             }
-        } else {
+        }
+        else
+        {
             cout << "No solution found" << endl;
         }
         output.close();
-    } catch (IloException& ex) {
+    }
+    catch (IloException &ex)
+    {
         cerr << "Error: " << ex << endl;
     }
 
