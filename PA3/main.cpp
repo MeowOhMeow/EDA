@@ -163,13 +163,16 @@ int main(int argc, char *argv[])
         {
             bool colorBit0Value = cplex.getValue(colorBit0[i]);
             bool colorBit1Value = cplex.getValue(colorBit1[i]);
-            int color = colorBit0Value ? 0 : colorBit1Value ? 1
-                                                            : 2;
-            cout << "Point " << i << " color: " << color << endl;
+            int color = colorBit0Value ? 1 : colorBit1Value ? 2
+                                                            : 3;
+            // cout << "Point " << i << " color: " << color << endl;
             output << i << " " << color << endl;
         }
 
         output.close();
+        cplex.end();
+
+        cout << "Solution written to " << argv[2] << endl;
     }
     catch (IloException &ex)
     {
