@@ -100,7 +100,8 @@ int main(int argc, char *argv[])
         IloCplex cplex(model);
 
         // There are 3 colors for each point to choose from
-        IloNumVarArray points(env, pointsCoordinates.size(), 0, 2, ILOINT);
+        IloNumVarArray colorBit0(env, pointsCoordinates.size(), 0, 1, ILOBOOL);
+        IloNumVarArray colorBit1(env, pointsCoordinates.size(), 0, 1, ILOBOOL);
 
         // Objective function
         IloExpr obj(env);
@@ -110,15 +111,17 @@ int main(int argc, char *argv[])
             for (const auto &neighbor_idx : neighbors[i])
             {
                 if (neighbor_idx < i)
-                    obj += (points[i] == points[neighbor_idx]);
-            }
+                {
+                    obj += (colorBit0[i] == colorBit0[neighbor_idx]) && (colorBit1[i] == colorBit1[neighbor_idx]);
+                }
+            }   
         }
         model.add(IloMinimize(env, obj));
 
         // Add constraints
         for (size_t i = 0; i < pointsCoordinates.size(); ++i)
         {
-            model.add(0 <= points[i] <= 2);
+            model.add(colorBit0[i] + colorBit1[i] <= 1);
         }
 
         // Solve the problem
@@ -131,8 +134,11 @@ int main(int argc, char *argv[])
             output << cplex.getObjValue() << endl;
             for (size_t i = 0; i < pointsCoordinates.size(); ++i)
             {
-                cout << "Point " << i << " color: " << cplex.getValue(points[i]) << endl;
-                output << i << " " << cplex.getValue(points[i]) << endl;
+                bool colorBit0Value = cplex.getValue(colorBit0[i]);
+                bool colorBit1Value = cplex.getValue(colorBit1[i]);
+                int color = colorBit0Value ? 0 : colorBit1Value ? 1 : 2;
+                cout << "Point " << i << " color: " << color << endl;
+                output << i << " " << color << endl;
             }
         } else {
             cout << "No solution found" << endl;
