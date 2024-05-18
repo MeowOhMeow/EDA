@@ -111,6 +111,16 @@ int main(int argc, char *argv[])
             colorBit0[i] = IloBoolVar(env);
             colorBit1[i] = IloBoolVar(env);
         }
+        IloBoolVarArray conflictBit0(env, pointsCoordinates.size() * pointsCoordinates.size());
+        IloBoolVarArray conflictBit1(env, pointsCoordinates.size() * pointsCoordinates.size());
+        for (size_t i = 0; i < pointsCoordinates.size(); ++i)
+        {
+            for (size_t j = 0; j < pointsCoordinates.size(); ++j)
+            {
+                conflictBit0[i*pointsCoordinates.size()+j] = IloBoolVar(env);
+                conflictBit1[i*pointsCoordinates.size()+j] = IloBoolVar(env);
+            }
+        }
 
         // Objective function
         IloExpr obj(env);
@@ -121,7 +131,7 @@ int main(int argc, char *argv[])
             {
                 if (neighbor_idx < i)
                 {
-                    obj += (colorBit0[i] == colorBit0[neighbor_idx]) && (colorBit1[i] == colorBit1[neighbor_idx]);
+                    obj += (conflictBit0[i*pointsCoordinates.size()+neighbor_idx] == 1) &&  (conflictBit1[i*pointsCoordinates.size()+neighbor_idx] == 1);
                 }
             }
         }
@@ -133,9 +143,15 @@ int main(int argc, char *argv[])
         {
             // constraint: there is only 3 colors can be chosen
             model.add(colorBit0[i] + colorBit1[i] <= 1);
-            // constraint: colorBits are binary
-            model.add(colorBit0[i] == 0 || colorBit0[i] == 1);
-            model.add(colorBit1[i] == 0 || colorBit1[i] == 1);
+            // no need because of the binary constraint already being satisfied from the datatype
+            // // constraint: colorBits are binary
+            // model.add(colorBit0[i] == 0 || colorBit0[i] == 1);
+            // model.add(colorBit1[i] == 0 || colorBit1[i] == 1);
+            // for (size_t j = 0; j < pointsCoordinates.size(); ++j)
+            // {
+            //     model.add(conflictBit0[i*pointsCoordinates.size()+j] == 0 || conflictBit0[i*pointsCoordinates.size()+j] == 1);
+            //     model.add(conflictBit1[i*pointsCoordinates.size()+j] == 0 || conflictBit1[i*pointsCoordinates.size()+j] == 1);
+            // }
 
             // constraint: if two points are neighbors, they cannot have the same color
             for (const auto &neighbor_idx : neighbors[i])
@@ -143,10 +159,10 @@ int main(int argc, char *argv[])
                 if (neighbor_idx < i)
                 {
                     // constraint: if two points are neighbors, they cannot have the same color
-                    model.add(colorBit0[i] + colorBit0[neighbor_idx] <= 1 + (colorBit0[i] == colorBit0[neighbor_idx]));
-                    model.add(colorBit1[i] + colorBit1[neighbor_idx] <= 1 + (colorBit1[i] == colorBit1[neighbor_idx]));
-                    model.add((1 - colorBit0[i]) + (1 - colorBit0[neighbor_idx]) <= 1 + (colorBit0[i] == colorBit0[neighbor_idx]));
-                    model.add((1 - colorBit1[i]) + (1 - colorBit1[neighbor_idx]) <= 1 + (colorBit1[i] == colorBit1[neighbor_idx]));
+                    model.add(colorBit0[i] + colorBit0[neighbor_idx] <= 1 + conflictBit0[i*pointsCoordinates.size()+neighbor_idx]);
+                    model.add(colorBit1[i] + colorBit1[neighbor_idx] <= 1 + conflictBit1[i*pointsCoordinates.size()+neighbor_idx]);
+                    model.add((1 - colorBit0[i]) + (1 - colorBit0[neighbor_idx]) <= 1 + conflictBit0[i*pointsCoordinates.size()+neighbor_idx]);
+                    model.add((1 - colorBit1[i]) + (1 - colorBit1[neighbor_idx]) <= 1 + conflictBit1[i*pointsCoordinates.size()+neighbor_idx]);
                 }
             }
         }
