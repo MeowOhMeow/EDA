@@ -113,12 +113,14 @@ int main(int argc, char *argv[])
         }
         IloBoolVarArray conflictBit0(env, pointsCoordinates.size() * pointsCoordinates.size());
         IloBoolVarArray conflictBit1(env, pointsCoordinates.size() * pointsCoordinates.size());
+        IloBoolVarArray conflict(env, pointsCoordinates.size() * pointsCoordinates.size());
         for (size_t i = 0; i < pointsCoordinates.size(); ++i)
         {
             for (size_t j = 0; j < pointsCoordinates.size(); ++j)
             {
                 conflictBit0[i*pointsCoordinates.size()+j] = IloBoolVar(env);
                 conflictBit1[i*pointsCoordinates.size()+j] = IloBoolVar(env);
+                conflict[i*pointsCoordinates.size()+j] = IloBoolVar(env);
             }
         }
 
@@ -131,7 +133,7 @@ int main(int argc, char *argv[])
             {
                 if (neighbor_idx < i)
                 {
-                    obj += (conflictBit0[i*pointsCoordinates.size()+neighbor_idx] == 1) &&  (conflictBit1[i*pointsCoordinates.size()+neighbor_idx] == 1);
+                    obj += conflict[i*pointsCoordinates.size()+neighbor_idx];
                 }
             }
         }
@@ -151,6 +153,7 @@ int main(int argc, char *argv[])
             // {
             //     model.add(conflictBit0[i*pointsCoordinates.size()+j] == 0 || conflictBit0[i*pointsCoordinates.size()+j] == 1);
             //     model.add(conflictBit1[i*pointsCoordinates.size()+j] == 0 || conflictBit1[i*pointsCoordinates.size()+j] == 1);
+            //     model.add(conflict[i*pointsCoordinates.size()+j] == 0 || conflict[i*pointsCoordinates.size()+j] == 1);
             // }
 
             // constraint: if two points are neighbors, they cannot have the same color
@@ -163,6 +166,7 @@ int main(int argc, char *argv[])
                     model.add(colorBit1[i] + colorBit1[neighbor_idx] <= 1 + conflictBit1[i*pointsCoordinates.size()+neighbor_idx]);
                     model.add((1 - colorBit0[i]) + (1 - colorBit0[neighbor_idx]) <= 1 + conflictBit0[i*pointsCoordinates.size()+neighbor_idx]);
                     model.add((1 - colorBit1[i]) + (1 - colorBit1[neighbor_idx]) <= 1 + conflictBit1[i*pointsCoordinates.size()+neighbor_idx]);
+                    model.add(conflictBit0[i*pointsCoordinates.size()+neighbor_idx] + conflictBit1[i*pointsCoordinates.size()+neighbor_idx] <= 1 + conflict[i*pointsCoordinates.size()+neighbor_idx]);
                 }
             }
         }
