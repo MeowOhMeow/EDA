@@ -6,7 +6,7 @@ CXXFLAGS = -I$(CPLEX_PATH)/concert/include -I$(CPLEX_PATH)/cplex/include   #tell
 # Linker flags
 LDFLAGS = -L$(CPLEX_PATH)/cplex/lib/x86-64_linux/static_pic -L$(CPLEX_PATH)/concert/lib/x86-64_linux/static_pic -lilocplex -lcplex -lconcert -lm -lpthread -ldl   #specify the path of library archives 
 # Executable nameS
-TARGET = Malware
+TARGET = tpl
 
 # Source files
 SRCS = main.cpp

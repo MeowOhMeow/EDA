@@ -37,5 +37,5 @@
 8. 執行方式：
     - 編譯完成後，請使用以下指令執行程式
     ```shell
-    $ ./Malware <input file name> <output file name>
+    $ ./tpl <input file name> <output file name>
     ```
