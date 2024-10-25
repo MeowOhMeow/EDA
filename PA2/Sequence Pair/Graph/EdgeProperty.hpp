@@ -12,7 +12,7 @@ public:
     EdgeProperty() {}
     EdgeProperty(EdgeData val) : value(val) {}
 
-    EdgeData getValue() const
+    EdgeData &getValue()
     {
         return value;
     }

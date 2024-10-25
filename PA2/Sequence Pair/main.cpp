@@ -76,14 +76,14 @@ int main(int argc, char *argv[])
     float minAspectRatio, maxAspectRatio;
     vector<Macro> macros = getMacros(argv[1], minAspectRatio, maxAspectRatio);
 
-    Scheduler scheduler(macros, minAspectRatio, maxAspectRatio);
+    Scheduler scheduler(macros, minAspectRatio, maxAspectRatio, 7);
 
     double avgSize = 0;
     for (auto &macro : macros)
     {
         avgSize += max(macro.getWidth(), macro.getHeight());
     }
-    SimulatedAnnealing sa(avgSize * avgSize, 0.85, 1e-20, 7, filename);
+    SimulatedAnnealing sa(avgSize * avgSize, 0.85, 1e-20, filename);
     sa.run(scheduler);
 
     in_time_t = chrono::system_clock::to_time_t(chrono::system_clock::now());

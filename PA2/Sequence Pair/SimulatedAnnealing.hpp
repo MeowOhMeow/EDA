@@ -18,7 +18,6 @@ class SimulatedAnnealing
 {
 private:
     double temperature, coolingRate, absoluteTemperature;
-    int iterations;
     string filename;
     ofstream logFile;
 
@@ -27,13 +26,11 @@ public:
         double temperature = 1,
         double coolingRate = 0.95,
         double absoluteTemperature = 0.01,
-        int iterations = 7,
         string filename = "log.txt")
     {
         this->temperature = temperature;
         this->coolingRate = coolingRate;
         this->absoluteTemperature = absoluteTemperature;
-        this->iterations = iterations;
         this->filename = filename;
         logFile.open(filename, ios::app);
     }
@@ -53,13 +50,11 @@ public:
         logFile << "temperature: " << temperature << endl;
         logFile << "coolingRate: " << coolingRate << endl;
         logFile << "absoluteTemperature: " << absoluteTemperature << endl;
-        logFile << "iterations: " << iterations << endl;
 
         scheduler.setTemperature(temperature);
         scheduler.setCoolingRate(coolingRate);
         assert(temperature > absoluteTemperature);
         assert(coolingRate > 0 && coolingRate < 1);
-        assert(iterations > 0);
         assert(temperature > 0);
         assert(absoluteTemperature > 0);
         assert(scheduler.getStepsPerIteration() > 0);

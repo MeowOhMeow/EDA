@@ -13,7 +13,7 @@
 
 #include "Macro.hpp"
 #include "SEQPairGraph.hpp"
-#include "Coordinates.hpp"
+#include "Rectangle.hpp"
 #include "Algorithms/TopologicalSort.hpp"
 #include "Algorithms/LongestPath.hpp"
 #include "BaseScheduler.hpp"
@@ -23,7 +23,7 @@ using namespace std;
 class Scheduler : public BaseScheduler
 {
 private:
-    SequencePairGraph *horizontalGraph, *verticalGraph;
+    SequencePairGraph *horizontalGraph = nullptr, *verticalGraph = nullptr;
     int numNodes;
 
     vector<Macro> macros;
@@ -32,6 +32,8 @@ private:
 
     pair<int, int> previousIndices;
     vector<function<void(int, int)>> moves;
+
+    int stepsPerIteration = 0;
 
     // Move functions encapsulated in std::function<>
     inline void move1(int v1, int v2)
@@ -68,8 +70,8 @@ private:
         }
         int w = macroDimensions[v][newAspectIndex].first;
         int h = macroDimensions[v][newAspectIndex].second;
-        horizontalGraph->getVertexProperty(v).getValue()->setValue(w);
-        verticalGraph->getVertexProperty(v).getValue()->setValue(h);
+        horizontalGraph->getVertexProperty(v).getValue().setValue(w);
+        verticalGraph->getVertexProperty(v).getValue().setValue(h);
         horizontalGraph->updateEdges(v);
         verticalGraph->updateEdges(v);
 
@@ -150,6 +152,7 @@ public:
         macroDimensions.resize(numNodes);
         macroDimensionsIndex.resize(numNodes, 0);
         moveProbabilities = {0.25, 0.25, 0.25, 0.25};
+        stepsPerIteration = 2 * k * numNodes;
 
         vector<int> macroWidths, macroHeights;
         for (int i = 0; i < numNodes; i++)
@@ -216,7 +219,7 @@ public:
         selectMove();
 
         movesCount++;
-        if (movesCount > 2 * k * numNodes)
+        if (movesCount > stepsPerIteration)
         {
             run = false;
         }
@@ -224,8 +227,8 @@ public:
 
     inline double evaluateState() override
     {
-        pair<vector<float>, vector<int>> longestPathH = LongestPath<Coordinates<int> *, NoProperty>::findLongestPath(*horizontalGraph);
-        pair<vector<float>, vector<int>> longestPathV = LongestPath<Coordinates<int> *, NoProperty>::findLongestPath(*verticalGraph);
+        pair<vector<float>, vector<int>> longestPathH = LongestPath<Rectangle<int>, NoProperty>::findLongestPath(*horizontalGraph);
+        pair<vector<float>, vector<int>> longestPathV = LongestPath<Rectangle<int>, NoProperty>::findLongestPath(*verticalGraph);
 
         return max(longestPathH.first.back(), longestPathV.first.back());
     }
@@ -250,17 +253,17 @@ public:
 
     inline int getStepsPerIteration() override
     {
-        return 2 * k * numNodes;
+        return stepsPerIteration;
     }
 
     void saveFloorplan(string filename)
     {
         ofstream file(filename);
 
-        vector<int> topologicalOrderH = Topological<Coordinates<int> *, NoProperty>::sort(*horizontalGraph);
-        vector<int> topologicalOrderV = Topological<Coordinates<int> *, NoProperty>::sort(*verticalGraph);
-        vector<float> costsH = LongestPath<Coordinates<int> *, NoProperty>::find(*horizontalGraph, topologicalOrderH);
-        vector<float> costsV = LongestPath<Coordinates<int> *, NoProperty>::find(*verticalGraph, topologicalOrderV);
+        vector<int> topologicalOrderH = Topological<Rectangle<int>, NoProperty>::sort(*horizontalGraph);
+        vector<int> topologicalOrderV = Topological<Rectangle<int>, NoProperty>::sort(*verticalGraph);
+        vector<float> costsH = LongestPath<Rectangle<int>, NoProperty>::find(*horizontalGraph, topologicalOrderH);
+        vector<float> costsV = LongestPath<Rectangle<int>, NoProperty>::find(*verticalGraph, topologicalOrderV);
 
         file << costsH.back() << " " << costsV.back() << endl;
 
@@ -275,8 +278,8 @@ public:
         {
             int x = xStarts[i];
             int y = yStarts[i];
-            int w = horizontalGraph->getVertexProperty(i).getValue()->getValue();
-            int h = verticalGraph->getVertexProperty(i).getValue()->getValue();
+            int w = horizontalGraph->getVertexProperty(i).getValue().getValue();
+            int h = verticalGraph->getVertexProperty(i).getValue().getValue();
             file << macros[i].getName() << " " << w << " " << h << " " << x << " " << y << " " << x + w << " " << y + h << endl;
         }
 

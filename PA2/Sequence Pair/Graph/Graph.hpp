@@ -78,7 +78,7 @@ public:
     }
 
     // Method to get edge property
-    EdgeProperty<EdgeData> getEdgeProperty(int source, int target) const
+    EdgeProperty<EdgeData> &getEdgeProperty(int source, int target)
     {
         auto it = edgePropertiesMap[source].find(target);
         if (it != edgePropertiesMap[source].end())
@@ -88,7 +88,7 @@ public:
         return emptyEdgeProperty;
     }
 
-    EdgeProperty<EdgeData> getEdgeProperty(const Vertex &source, const Vertex &target) const
+    EdgeProperty<EdgeData> &getEdgeProperty(const Vertex &source, const Vertex &target)
     {
         return getEdgeProperty(source.getId(), target.getId());
     }
@@ -126,12 +126,12 @@ public:
     }
 
     // Method to get vertex property
-    VertexProperty<VertexData> getVertexProperty(int vertex) const
+    VertexProperty<VertexData> &getVertexProperty(int vertex)
     {
         return vertexPropertiesMap[vertex];
     }
 
-    VertexProperty<VertexData> getVertexProperty(const Vertex &vertex) const
+    VertexProperty<VertexData> &getVertexProperty(const Vertex &vertex)
     {
         return getVertexProperty(vertex.getId());
     }

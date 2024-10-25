@@ -9,27 +9,27 @@
 #include <algorithm>
 
 #include "Macro.hpp"
-#include "Coordinates.hpp"
+#include "Rectangle.hpp"
 #include "Graph/Graph.hpp"
 
 using namespace std;
 
 // Define a class for the sequence pair graph
-class SequencePairGraph : public Graph<Coordinates<int> *, NoProperty>
+class SequencePairGraph : public Graph<Rectangle<int>, NoProperty>
 {
 private:
     int numNodes;
 
     inline void checkAndAddEdge(int v1, int v2)
     {
-        int x1 = getVertexProperty(v1).getValue()->getX();
-        int y1 = getVertexProperty(v1).getValue()->getY();
-        int x2 = getVertexProperty(v2).getValue()->getX();
-        int y2 = getVertexProperty(v2).getValue()->getY();
+        int x1 = getVertexProperty(v1).getValue().getX();
+        int y1 = getVertexProperty(v1).getValue().getY();
+        int x2 = getVertexProperty(v2).getValue().getX();
+        int y2 = getVertexProperty(v2).getValue().getY();
 
         if (x1 < x2 && y1 < y2)
         {
-            addDirectedEdge(v1, v2, getVertexProperty(v1).getValue()->getValue());
+            addDirectedEdge(v1, v2, getVertexProperty(v1).getValue().getValue());
         }
     }
 
@@ -48,7 +48,7 @@ private:
             // Add edges from source to all nodes
             addDirectedEdge(numNodes, v1, 0);
             // Add edges from all nodes to sink
-            addDirectedEdge(v1, numNodes + 1, getVertexProperty(v1).getValue()->getValue());
+            addDirectedEdge(v1, numNodes + 1, getVertexProperty(v1).getValue().getValue());
         }
     }
 
@@ -75,14 +75,14 @@ private:
         addDirectedEdge(numNodes, v1, 0);
         addDirectedEdge(numNodes, v2, 0);
         // Add edges from v1 and v2 to sink
-        addDirectedEdge(v1, numNodes + 1, getVertexProperty(v1).getValue()->getValue());
-        addDirectedEdge(v2, numNodes + 1, getVertexProperty(v2).getValue()->getValue());
+        addDirectedEdge(v1, numNodes + 1, getVertexProperty(v1).getValue().getValue());
+        addDirectedEdge(v2, numNodes + 1, getVertexProperty(v2).getValue().getValue());
     }
 
 public:
-    SequencePairGraph() : Graph<Coordinates<int> *, NoProperty>(0) {}
+    SequencePairGraph() : Graph<Rectangle<int>, NoProperty>(0) {}
     SequencePairGraph(vector<int> &macroSizes, bool isVertical = false)
-        : Graph<Coordinates<int> *, NoProperty>(macroSizes.size() + 2)
+        : Graph<Rectangle<int>, NoProperty>(macroSizes.size() + 2)
     {
         numNodes = static_cast<int>(macroSizes.size());
 
@@ -90,44 +90,40 @@ public:
         {
             for (int i = 0; i < numNodes; i++)
             {
-                setVertexProperty(i, new Coordinates<int>(i, numNodes - 1 - i, macroSizes[i]));
+                setVertexProperty(i, Rectangle<int>(i, numNodes - 1 - i, macroSizes[i]));
             }
         }
         else
         {
             for (int i = 0; i < numNodes; i++)
             {
-                setVertexProperty(i, new Coordinates<int>(i, i, macroSizes[i]));
+                setVertexProperty(i, Rectangle<int>(i, i, macroSizes[i]));
             }
         }
-        setVertexProperty(numNodes, new Coordinates<int>(-1, -1, 0));
-        setVertexProperty(numNodes + 1, new Coordinates<int>(numNodes, numNodes, 0));
+        setVertexProperty(numNodes, Rectangle<int>(-1, -1, 0));
+        setVertexProperty(numNodes + 1, Rectangle<int>(numNodes, numNodes, 0));
 
         initEdges();
     }
 
     ~SequencePairGraph()
     {
-        for (int i = 0; i < size(); i++)
-        {
-            delete getVertexProperty(i).getValue();
-        }
     }
 
     void swapX(int v1, int v2)
     {
-        int temp = getVertexProperty(v1).getValue()->getX();
-        getVertexProperty(v1).getValue()->setX(getVertexProperty(v2).getValue()->getX());
-        getVertexProperty(v2).getValue()->setX(temp);
+        int temp = getVertexProperty(v1).getValue().getX();
+        getVertexProperty(v1).getValue().setW(getVertexProperty(v2).getValue().getX());
+        getVertexProperty(v2).getValue().setW(temp);
 
         maintainEdges(v1, v2);
     }
 
     void swapY(int v1, int v2)
     {
-        int temp = getVertexProperty(v1).getValue()->getY();
-        getVertexProperty(v1).getValue()->setY(getVertexProperty(v2).getValue()->getY());
-        getVertexProperty(v2).getValue()->setY(temp);
+        int temp = getVertexProperty(v1).getValue().getY();
+        getVertexProperty(v1).getValue().setH(getVertexProperty(v2).getValue().getY());
+        getVertexProperty(v2).getValue().setH(temp);
 
         maintainEdges(v1, v2);
     }
@@ -137,20 +133,20 @@ public:
      */
     void swapBoth(int v1, int v2)
     {
-        int temp = getVertexProperty(v1).getValue()->getX();
-        getVertexProperty(v1).getValue()->setX(getVertexProperty(v2).getValue()->getX());
-        getVertexProperty(v2).getValue()->setX(temp);
+        int temp = getVertexProperty(v1).getValue().getX();
+        getVertexProperty(v1).getValue().setW(getVertexProperty(v2).getValue().getX());
+        getVertexProperty(v2).getValue().setW(temp);
 
-        temp = getVertexProperty(v1).getValue()->getY();
-        getVertexProperty(v1).getValue()->setY(getVertexProperty(v2).getValue()->getY());
-        getVertexProperty(v2).getValue()->setY(temp);
+        temp = getVertexProperty(v1).getValue().getY();
+        getVertexProperty(v1).getValue().setH(getVertexProperty(v2).getValue().getY());
+        getVertexProperty(v2).getValue().setH(temp);
 
         maintainEdges(v1, v2);
     }
 
     void updateEdges(int v1)
     {
-        int value = getVertexProperty(v1).getValue()->getValue();
+        int value = getVertexProperty(v1).getValue().getValue();
 
         for (int v2 : getNeighbors(v1))
         {

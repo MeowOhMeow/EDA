@@ -12,7 +12,7 @@ public:
     VertexProperty() {}
     VertexProperty(VertexData val) : value(val) {}
 
-    VertexData getValue() const
+    VertexData &getValue()
     {
         return value;
     }
