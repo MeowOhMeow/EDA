@@ -7,8 +7,10 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <cassert>
+#include <cmath>
 
-#include "Scheduler.hpp"
+#include "BaseScheduler.hpp"
 
 using namespace std;
 
@@ -46,7 +48,7 @@ public:
         return filename;
     }
 
-    void run(Scheduler &scheduler)
+    void run(BaseScheduler &scheduler)
     {
         logFile << "temperature: " << temperature << endl;
         logFile << "coolingRate: " << coolingRate << endl;
@@ -55,8 +57,14 @@ public:
 
         scheduler.setTemperature(temperature);
         scheduler.setCoolingRate(coolingRate);
+        assert(temperature > absoluteTemperature);
+        assert(coolingRate > 0 && coolingRate < 1);
+        assert(iterations > 0);
+        assert(temperature > 0);
+        assert(absoluteTemperature > 0);
+        assert(scheduler.getStepsPerIteration() > 0);
         int totalIterations = log2(absoluteTemperature / temperature) / log2(coolingRate);
-        int stepPerIteration = scheduler.getStepPerIteration();
+        int stepPerIteration = scheduler.getStepsPerIteration();
         int currentIteration = 0;
 
         float bestCost = scheduler.evaluateState();
@@ -100,10 +108,10 @@ public:
             }
             currentIteration++;
             int completeSteps = min(100 * currentIteration / totalIterations, 100);
-            int ETA = max(max(totalIterations - currentIteration, 0) * stepPerIteration, 0) * (scheduler.getElapsed() / float(steps + 1));
+            int ETA = max(max(totalIterations - currentIteration, 0) * stepPerIteration, 0) * (scheduler.getElapsedTimeInSeconds() / float(steps + 1));
             cout << "Progress: " << completeSteps << "% [" << string(completeSteps / 2, '=') << string(50 - completeSteps / 2, ' ') << "] ETA: " << ETA << "s   " << "\r" << flush;
 
-            logFile << setw(10) << scheduler.getElapsed() << setw(10) << steps << setw(20) << bestCost << endl;
+            logFile << setw(10) << scheduler.getElapsedTimeInSeconds() << setw(10) << steps << setw(20) << bestCost << endl;
         } while (scheduler.isImproving() && !scheduler.hasTimeExpired() && scheduler.getTemperature() > absoluteTemperature);
 
         if (scheduler.hasTimeExpired())

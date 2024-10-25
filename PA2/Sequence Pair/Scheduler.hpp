@@ -3,105 +3,110 @@
 
 #include <iostream>
 #include <vector>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <unordered_map>
-#include <chrono>
 #include <random>
+#include <chrono>
+#include <algorithm>
+#include <numeric>
+#include <fstream>
+#include <functional>
+#include <cassert>
 
 #include "Macro.hpp"
 #include "SEQPairGraph.hpp"
 #include "Coordinates.hpp"
 #include "Algorithms/TopologicalSort.hpp"
 #include "Algorithms/LongestPath.hpp"
+#include "BaseScheduler.hpp"
 
 using namespace std;
 
-const int NUM_MOVES = 4;
-enum Moves
-{
-    M1,
-    M2,
-    M3,
-    M4
-};
-
-class Scheduler
+class Scheduler : public BaseScheduler
 {
 private:
-    chrono::high_resolution_clock::time_point start, end;
-
     SequencePairGraph *horizontalGraph, *verticalGraph;
-
-    int numNodes, k;
-    int movesCount = 0;
-    int uphillCount = 0;
-    int rejectCount = 0;
-
-    bool improving = true;
-    bool run = true;
-
-    double temperature = 1;
-    double coolingRate = 0.95;
-
-    Moves previousMove;
-    pair<int, int> previousIndices;
-    vector<int> previousLongestPathH, previousLongestPathV;
+    int numNodes;
 
     vector<Macro> macros;
-    float minAspectRatio, maxAspectRatio;
     vector<vector<pair<int, int>>> macroDimensions;
     vector<int> macroDimensionsIndex;
 
-    // move 1: swapX
+    pair<int, int> previousIndices;
+    vector<function<void(int, int)>> moves;
+
+    // Move functions encapsulated in std::function<>
     inline void move1(int v1, int v2)
     {
         horizontalGraph->swapX(v1, v2);
         verticalGraph->swapY(v1, v2);
-        previousMove = M1;
+
+        previousMove = 0;
         previousIndices = {v1, v2};
     }
 
-    // move 2: swapY
     inline void move2(int v1, int v2)
     {
         horizontalGraph->swapY(v1, v2);
         verticalGraph->swapX(v1, v2);
-        previousMove = M2;
+
+        previousMove = 1;
         previousIndices = {v1, v2};
     }
 
-    // move 3: change dimensions
     inline void move3(int v, int aspectIndex = -1)
     {
         int originalIndex = macroDimensionsIndex[v];
+        int newAspectIndex = 0;
         if (aspectIndex == -1)
         {
-            aspectIndex = (originalIndex + 1) % macroDimensions[v].size();
-            macroDimensionsIndex[v] = aspectIndex;
+            newAspectIndex = (originalIndex + 1) % macroDimensions[v].size();
+            macroDimensionsIndex[v] = newAspectIndex;
         }
         else
         {
             macroDimensionsIndex[v] = aspectIndex;
+            newAspectIndex = aspectIndex;
         }
-        int w = macroDimensions[v][aspectIndex].first;
-        int h = macroDimensions[v][aspectIndex].second;
+        int w = macroDimensions[v][newAspectIndex].first;
+        int h = macroDimensions[v][newAspectIndex].second;
         horizontalGraph->getVertexProperty(v).getValue()->setValue(w);
         verticalGraph->getVertexProperty(v).getValue()->setValue(h);
         horizontalGraph->updateEdges(v);
         verticalGraph->updateEdges(v);
-        previousMove = M3;
+
+        previousMove = 2;
         previousIndices = {v, originalIndex};
     }
 
-    // move 4: swap both
     inline void move4(int v1, int v2)
     {
         horizontalGraph->swapBoth(v1, v2);
         verticalGraph->swapBoth(v1, v2);
-        previousMove = M4;
+
+        previousMove = 3;
         previousIndices = {v1, v2};
+    }
+
+    void initializeMoves()
+    {
+        // Define the moves using std::function<>. These moves can now be stored in a vector.
+        moves.push_back([this](int v1, int v2)
+                        { move1(v1, v2); });
+        moves.push_back([this](int v1, int v2)
+                        { move2(v1, v2); });
+        moves.push_back([this](int v, int)
+                        { move3(v, 0); });
+        moves.push_back([this](int v1, int v2)
+                        { move4(v1, v2); });
+
+        // Initialize the CDF based on move probabilities
+        cdf.resize(moves.size());
+        partial_sum(moveProbabilities.begin(), moveProbabilities.end(), cdf.begin());
+    }
+
+    // Random node selection
+    inline int getRandomNode()
+    {
+        return getRandomNumber(0, numNodes - 1);
     }
 
     vector<pair<int, int>> findIntegerDimensions(int area, float minAspectRatio, float maxAspectRatio)
@@ -138,14 +143,13 @@ private:
     }
 
 public:
-    Scheduler(vector<Macro> &macros, float minAspectRatio, float maxAspectRatio, int k = 7, int timeLimit = 10) : k(k), macros(macros), minAspectRatio(minAspectRatio), maxAspectRatio(maxAspectRatio)
+    Scheduler(vector<Macro> &macros, float minAspectRatio, float maxAspectRatio, int k = 7, int timeLimit = 10)
+        : BaseScheduler(1.0, 0.95, timeLimit, k), macros(macros)
     {
-        start = chrono::high_resolution_clock::now();
-        end = start + chrono::minutes(timeLimit);
-
         numNodes = macros.size();
         macroDimensions.resize(numNodes);
         macroDimensionsIndex.resize(numNodes, 0);
+        moveProbabilities = {0.25, 0.25, 0.25, 0.25};
 
         vector<int> macroWidths, macroHeights;
         for (int i = 0; i < numNodes; i++)
@@ -165,6 +169,9 @@ public:
 
         horizontalGraph = new SequencePairGraph(macroWidths);
         verticalGraph = new SequencePairGraph(macroHeights, true);
+
+        // Initialize the moves and CDF
+        initializeMoves();
     }
 
     ~Scheduler()
@@ -173,7 +180,30 @@ public:
         delete verticalGraph;
     }
 
-    inline void initialize()
+    // Randomly select a move based on the CDF
+    void selectMove()
+    {
+        double r = getRandomNumber(0.0, 1.0);
+        auto it = lower_bound(cdf.begin(), cdf.end(), r);
+        int moveIndex = distance(cdf.begin(), it);
+
+        int v1 = getRandomNode();
+        int v2 = getRandomNode();
+        while (v1 == v2)
+        {
+            v2 = getRandomNode();
+        }
+        if (moveIndex == 2)
+        {
+            moves[moveIndex](v1, -1);
+        }
+        else
+        {
+            moves[moveIndex](v1, v2);
+        }
+    }
+
+    inline void initialize() override
     {
         run = true;
         movesCount = 0;
@@ -181,74 +211,28 @@ public:
         uphillCount = 0;
     }
 
-    inline void setTemperature(double temperature)
+    inline void makeRandomModification() override
     {
-        this->temperature = temperature;
-    }
+        selectMove();
 
-    inline void setCoolingRate(double coolingRate)
-    {
-        this->coolingRate = coolingRate;
-    }
-
-    // event handlers
-    inline void makeRandomModification()
-    {
         movesCount++;
-        if (movesCount > 2 * numNodes * k)
+        if (movesCount > 2 * k * numNodes)
         {
             run = false;
         }
-        int v1 = previousLongestPathH[getRandomNumber(1, previousLongestPathH.size() - 2)];
-        int v2 = previousLongestPathV[getRandomNumber(1, previousLongestPathV.size() - 2)];
-        if (v1 == v2)
-        {
-            v2 = (v1 + 1) % numNodes;
-        }
-        // make a random modification to the current graph (state)
-        int move = getRandomNumber(0, NUM_MOVES - 1);
-        while (move == M3 && macroDimensions[v1].size() == 1)
-        {
-            move = getRandomNumber(0, NUM_MOVES - 1);
-        }
-        switch (move)
-        {
-        case M1:
-            move1(v1, v2);
-            break;
-        case M2:
-            move2(v1, v2);
-            break;
-        case M3:
-            move3(getRandomNumber(0, numNodes - 1));
-            break;
-        case M4:
-            move4(v1, v2);
-            break;
-
-        default:
-            cerr << "Invalid move" << endl;
-            break;
-        }
     }
 
-    inline double evaluateState()
+    inline double evaluateState() override
     {
         pair<vector<float>, vector<int>> longestPathH = LongestPath<Coordinates<int> *, NoProperty>::findLongestPath(*horizontalGraph);
         pair<vector<float>, vector<int>> longestPathV = LongestPath<Coordinates<int> *, NoProperty>::findLongestPath(*verticalGraph);
 
-        vector<float> costsH = longestPathH.first;
-        vector<float> costsV = longestPathV.first;
-
-        previousLongestPathH = longestPathH.second;
-        previousLongestPathV = longestPathV.second;
-
-        return max(costsH.back(), costsV.back());
+        return max(longestPathH.first.back(), longestPathV.first.back());
     }
 
-    inline void accept() {}
+    inline void accept() override {}
 
-    inline void uphill()
+    inline void uphill() override
     {
         uphillCount++;
         if (uphillCount > numNodes)
@@ -257,84 +241,16 @@ public:
         }
     }
 
-    inline void reject()
+    inline void reject() override
     {
         rejectCount++;
 
-        switch (previousMove)
-        {
-        case M1:
-            move1(previousIndices.first, previousIndices.second);
-            break;
-        case M2:
-            move2(previousIndices.first, previousIndices.second);
-            break;
-        case M3:
-            move3(previousIndices.first, previousIndices.second);
-            break;
-        case M4:
-            move4(previousIndices.first, previousIndices.second);
-            break;
-
-        default:
-            break;
-        }
+        moves[previousMove](previousIndices.first, previousIndices.second);
     }
 
-    // scheduling functions
-    inline bool isImproving()
+    inline int getStepsPerIteration() override
     {
-        temperature *= coolingRate;
-        // check if the current state is improving
-        if (rejectCount / movesCount > 0.99)
-        {
-            improving = false;
-        }
-        return improving;
-    }
-
-    inline bool canContinue()
-    {
-        return run;
-    }
-
-    inline bool hasTimeExpired()
-    {
-        // check if there is still time left
-        return chrono::high_resolution_clock::now() >= end;
-    }
-
-    // in seconds
-    inline int getElapsed()
-    {
-        return chrono::duration_cast<chrono::seconds>(chrono::high_resolution_clock::now() - start).count();
-    }
-
-    inline double getTemperature()
-    {
-        return temperature;
-    }
-
-    inline int getStepPerIteration()
-    {
-        return 2 * numNodes * k;
-    }
-
-    // random generator, range: [min, max]
-    inline int getRandomNumber(int min, int max)
-    {
-        static random_device rd;
-        static mt19937 gen(rd());
-        uniform_int_distribution<int> dis(min, max);
-        return dis(gen);
-    }
-
-    inline float getRandomNumber(float min, float max)
-    {
-        static random_device rd;
-        static mt19937 gen(rd());
-        uniform_real_distribution<float> dis(min, max);
-        return dis(gen);
+        return 2 * k * numNodes;
     }
 
     void saveFloorplan(string filename)
